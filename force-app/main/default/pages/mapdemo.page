@@ -1,0 +1,7 @@
+<apex:page controller="MapController">
+<apex:repeat value="{!keys}" var="key" rendered="false">
+   <apex:repeat value="{!regMap[key]}" var="map">
+       <Apex:outputText value="{!regMap[key].name}"/> <br/>
+   </apex:repeat>
+</apex:repeat>
+</apex:page>

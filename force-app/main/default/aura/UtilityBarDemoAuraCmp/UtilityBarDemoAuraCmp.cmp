@@ -1,0 +1,29 @@
+<aura:component implements="flexipage:availableForAllPageTypes,force:lightningQuickAction,force:hasRecordId,lightning:isUrlAddressable" 
+                access="global" 
+                controller="LWCCreateContactController">
+    
+    <aura:attribute name="conId" type="String" />
+    <aura:attribute name="firstName" type="String" />
+    <aura:attribute name="lastName" type="String"/>
+    
+    <lightning:workspaceAPI aura:id="workspace" />
+    <aura:registerEvent name="appEvent" type="c:ApplicationEventDemo"/>
+    
+    <lightning:button label="Fire Event"
+                      onclick="{!c.fireApplicationEvent}" />
+    <div>
+        Standard view page:
+        <c:utilityBar onfilterchange="{!c.eventCall}"/>
+    </div>
+    <div>
+        Custom component:
+        <c:utilityBar onfilterchange="{!c.openTab}"/>
+    </div>
+    
+   <lightning:input type="text" name="input1" label="First Name" value="{!v.firstName}" />
+   <lightning:input type="text" name="input1" label="Last Name" value="{!v.lastName}"/>
+    
+    <lightning:button label="Save"
+                      onclick="{!c.saveContact}" />
+    
+</aura:component>

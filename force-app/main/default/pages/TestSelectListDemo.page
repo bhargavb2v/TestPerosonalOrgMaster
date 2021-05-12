@@ -1,0 +1,18 @@
+<apex:page controller="TestSelectListDemoController">
+    <apex:form id="myForm">
+        <apex:outputPanel rendered="{!profile=='ABC'}"> 
+        <apex:selectList value="{!selectedState}" size="1">
+            <apex:selectOptions value="{!stateList}"></apex:selectOptions>
+            <apex:actionSupport event="onchange" action="{!stateChange}" reRender="myForm"/>
+        </apex:selectList>
+        </apex:outputPanel>
+        
+        <apex:outputPanel rendered="{!selectedState=='TS'}"> 
+        <apex:selectList value="{!selectedCity}" size="1">
+            <apex:selectOptions value="{!cityList}"></apex:selectOptions>
+            <apex:actionSupport event="onchange" action="{!cityChange}" reRender="myForm"/>
+        </apex:selectList>
+        </apex:outputPanel>
+        {!selectedState} {!selectedCity}
+    </apex:form>
+</apex:page>

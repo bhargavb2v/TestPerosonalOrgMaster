@@ -1,0 +1,825 @@
+<apex:page showHeader="true" sidebar="false" controller="SFIAcceleratorController">
+    <c:scripts />
+    <style>
+       .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+            padding: 8px;
+            line-height: 1.42857143;
+            vertical-align: top;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        td, th {
+            padding: 0;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+      .ng-modal-dialog {
+      /* A centered div above the overlay with a box shadow. */
+      z-index:10000;
+      position: absolute;
+      width: 50%; /* Default */
+    
+      /* Center the dialog */
+      top:300px;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      -webkit-transform: translate(-50%, -50%);
+      -moz-transform: translate(-50%, -50%);
+    
+      background-color: #fff;
+      box-shadow: 4px 4px 80px #000;
+    }
+    
+    .ng-modal-overlay {
+          /* A dark translucent div that covers the whole screen */
+          position:fixed;
+          z-index:9999;
+          top:0;
+          left:0;
+         width:100%;
+          height:100%;
+          background-color:#000000;
+          opacity: 0.8;
+        }
+        .ng-modal-overlaytemp {
+          /* A dark translucent div that covers the whole screen */
+          position:fixed;
+          z-index:10001;
+          top:0;
+          left:0;
+          width:100%;
+          height:100%;
+          background-color:#000000;
+          opacity: 0.8;
+        }
+        .ng-modal-dialog {
+          /* A centered div above the overlay with a box shadow. */
+          z-index:10000;
+          position: absolute;
+          width: 50%; /* Default */
+        
+          /* Center the dialog */
+          top:200px;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          -webkit-transform: translate(-50%, -50%);
+          -moz-transform: translate(-50%, -50%);
+        
+          background-color: #fff;
+          box-shadow: 4px 4px 80px #000;
+        }
+        
+        .ng-modal-dialogtemp {
+          /* A centered div above the overlay with a box shadow. */
+          z-index:10002;
+          position: absolute;
+          width: 50%; /* Default */
+        
+          /* Center the dialog */
+          top:200px;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          -webkit-transform: translate(-50%, -50%);
+          -moz-transform: translate(-50%, -50%);
+        
+          background-color: #fff;
+          box-shadow: 4px 4px 80px #000;
+        }
+    
+        .ng-modal-dialog-content {
+          padding:10px;
+          text-align: left;
+        }
+        .ng-modal-close {
+          position: absolute;
+          top: 3px;
+          right: 5px;
+          padding: 5px;
+          cursor: pointer;
+          font-size: 120%;
+          display: inline-block;
+          font-weight: bold;
+          font-family: 'arial', 'sans-serif';
+        }
+    
+        @keyframes anim {
+            0% { background-position: 0 0; }
+            100% { background-position: 50px 50px; }
+        }    
+
+        .bar {
+            position: absolute;
+            margin: auto;
+           top: 0; bottom: 0; left: 0; right: 0;
+            width: 200px;
+            height: 30px;
+            overflow: hidden;
+            background-size:100px 100px;
+            background-image: linear-gradient(-45deg,
+            #33c9ff 25%, #00b2f2 25%, 
+            #00b2f2 50%, #33c9ff 50%,
+            #33c9ff 75%, #00b2f2 75%);
+            animation: anim 1s linear infinite;
+        }
+        
+        .bar p {
+          width: 100px;
+          margin: 6px auto;
+          text-align: center;
+          color: white;
+        }
+         .req {font-size: 150%; color:red} 
+         
+         .pageBlockSection {
+            background-color: #AED6F1;
+            padding-left: 3px;
+            /* vertical-align: middle !important; */
+            font-weight: bold;
+            color: white;
+            /* align-content: center; */
+            padding:6px;
+        }
+        
+        .req {font-size: 150%; color:red} 
+        
+        .overlay {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1000000;
+            top: 0;
+            right: 0;
+            background-color: rgb(93, 208, 226);
+            overflow-x: hidden;
+            transition: 0.5s;
+        }
+        
+          .overlay-content {
+            position: relative;
+            top: 10%;
+            width: 100%;
+            color: white;
+            margin-top: 30px;
+        }
+        .overlay a {
+            padding: 8px;
+            text-decoration: none;
+            font-size: 36px;
+            color: #818181;
+            display: block;
+            transition: 0.3s;
+        }
+        
+        .overlay a:hover, .overlay a:focus {
+            color: #f1f1f1;
+        }
+        
+        .overlay .closebtn {
+            position: absolute;
+            top: 10px;
+            right: 30px;
+            font-size: 40px;
+        }
+        
+        @media screen and (max-height: 450px) {
+          .overlay a {font-size: 20px}
+          .overlay .closebtn {
+            font-size: 40px;
+            top: 15px;
+            right: 35px;
+          }
+        }
+    </style>
+    <script>
+        $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip();   
+        });
+
+        var app = angular.module('MyApp', []);
+        
+        app.directive('modalDialog', function() {
+          return {
+            restrict: 'E',
+            scope: {
+              show: '='
+            },
+            replace: true, // Replace with the template below
+            transclude: true, // we want to insert custom content inside the directive
+            link: function(scope, element, attrs) {
+              scope.dialogStyle = {};
+              if(attrs.width)
+                scope.dialogStyle.width = attrs.width;
+              if(attrs.height)
+                scope.dialogStyle.height = attrs.height;
+              scope.hideModal = function() {
+                scope.show = false;
+              };
+            },
+           template: function(tElement, tAttrs) {
+                if(tAttrs.type == 'Loading'){
+                return "<div class='ng-modal' ng-show='show'><div class='ng-modal-overlaytemp'></div><div class='ng-modal-dialogtemp' ng-style='dialogStyle'><div ng-transclude></div></div></div>";
+                }
+                else if(type = 'inputWindow'){
+                return "<div class='ng-modal' ng-show='show'><div class='ng-modal-overlay''></div><div class='ng-modal-dialog' ng-style='dialogStyle'><div class='ng-modal-close' ng-click='hideModal()'>X</div><div class='ng-modal-dialog-content' ng-transclude></div></div></div>";
+                }
+                else if(type = 'emailWindow'){
+                return "<div class='ng-modal' ng-show='show'><div class='ng-modal-overlay''></div><div class='ng-modal-dialog' ng-style='dialogStyle'><div class='ng-modal-close' ng-click='hideModal()'>X</div><div class='ng-modal-dialog-content' ng-transclude></div></div></div>";
+                }  
+                else if(type = 'refWindow'){
+                return "<div class='ng-modal' ng-show='show'><div class='ng-modal-overlay''></div><div class='ng-modal-dialog' ng-style='dialogStyle'><div class='ng-modal-close' ng-click='hideModal()'>X</div><div class='ng-modal-dialog-content' ng-transclude></div></div></div>";
+                }
+             } 
+          };
+        });
+        
+        app.filter('pagination', function(){
+             return function(input, start){
+                 start = +start;
+                 return input.slice(start);
+             };
+        });
+        
+        app.controller('SFIAcceleratorController' ,['$scope',function($scope){
+            $scope.sObjectType = ['Select','Custom Object','Standard Object','Both'];
+            $scope.sObjType = 'Select';
+            $scope.sObjectList = [];
+            $scope.sObjMap = [];
+            
+            $scope.filteredItems = [];
+            $scope.dataTypeList = [];
+            $scope.dataTypes = [];
+            
+            $scope.pageSizeValues = [100,250,500,1000,2000];
+            $scope.pageSize = 100;
+            $scope.curPage = 0;
+            $scope.reverse = true;
+            
+            $scope.fieldListTemp = [];
+            
+            $scope.search = function(item){
+                if($scope.searchText == undefined){
+                    return true;
+                }
+                else{
+                    var bool = item.isUsed;
+                    var x = bool.toString().toLowerCase();
+                    if(item.fw.objLabel.toLowerCase().indexOf($scope.searchText.toLowerCase()) > -1 
+                        || item.fw.fLabel.toLowerCase().indexOf($scope.searchText.toLowerCase()) > -1
+                        || item.fw.fApi.toLowerCase().indexOf($scope.searchText.toLowerCase()) > -1
+                        || item.fw.fDataType.toLowerCase().indexOf($scope.searchText.toLowerCase()) > -1 
+                        || item.fw.isEncrypted.toString().toLowerCase().indexOf($scope.searchText.toLowerCase()) > -1
+                        || item.isUsed.toString().toLowerCase().indexOf($scope.searchText.toLowerCase()) > -1
+                        || item.fw.isSensitive.toString().toLowerCase().indexOf($scope.searchText.toLowerCase()) > -1 
+                        || (item.fw.comments != null 
+                                    &&  (item.fw.comments.toLowerCase().indexOf($scope.searchText.toLowerCase()) > -1))){
+                        return true;
+                    }
+                }
+                
+                return false;
+            }
+            
+            $scope.setDefault = function(sList){
+                $scope.curPage = 0;
+                
+                $scope.firstRec = sList.length > 0 ? 1 : 0;
+                $scope.lastRec = sList.length > $scope.pageSize ? $scope.pageSize : sList.length > 0 ?sList.length :0;
+                $scope.totalRec = sList.length;
+                $scope.total = $scope.fieldList.length;
+                $scope.filteredItems = sList;      
+            }
+            
+            $scope.sort = function(keyname){
+                $scope.sortKey = keyname;   //set the sortKey to the param passed
+                $scope.reverse = !$scope.reverse; //if true make it false and vice versa
+            };
+            
+            $scope.searchChange = function(){
+                $scope.setDefault($scope.filteredItems);
+            };
+            
+            $scope.numberOfPages = function() {
+                return Math.ceil($scope.filteredItems.length / $scope.pageSize);
+            }; 
+            
+            $scope.pazeSizeChange = function(){
+                $scope.setDefault($scope.filteredItems);
+            }
+            
+            $scope.nextClick = function(){
+                $scope.curPage = $scope.curPage+1;
+                $scope.firstRec = $scope.filteredItems.length > 0 ? (($scope.curPage * $scope.pageSize) + 1) : 0;
+                $scope.lastRec = $scope.filteredItems.length > (($scope.curPage+1) * $scope.pageSize) ? (($scope.curPage+1) * $scope.pageSize) : $scope.filteredItems.length;
+                $scope.totalRec = $scope.filteredItems.length;
+            }
+            
+            $scope.PreviousClick = function(){
+                $scope.curPage = $scope.curPage-1;
+                $scope.firstRec = $scope.filteredItems.length > 0 ? (($scope.curPage * $scope.pageSize) + 1) : 0;
+                $scope.lastRec = $scope.filteredItems.length > (($scope.curPage+1) * $scope.pageSize) ? (($scope.curPage+1) * $scope.pageSize) : $scope.filteredItems.length;
+                $scope.totalRec = $scope.filteredItems.length;
+            }
+            
+            $scope.getObjectInformation = function(){
+               $scope.modalShown = true;
+               Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.SFIAcceleratorController.getObjectInformation}',$scope.sObjType,
+                    function(result, event) {
+                        if(event.status) {  
+                            $scope.sObject = 'Select';
+                            $scope.sObjectList = result.sObjList;
+                            $scope.sObjMap = result.sObjMap;
+                            $scope.dataTypeList = result.dataTypeList;   
+                        }
+                        $scope.modalShown = false;
+                        $scope.$apply();    
+                    },{escape: false}
+                );               
+            }   
+            
+            $scope.fieldList = [];
+            $scope.getFieldInformation = function(){
+                var objName;
+                if($scope.sObject == 'All'){
+                    objName = 'All';
+                }
+                else{
+                    var objName = $scope.sObjMap[$scope.sObject];
+                }
+                
+                $scope.modalShown = true;
+                Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.SFIAcceleratorController.getFieldInformation}',$scope.sObjType,objName,
+                    function(result, event) {
+                        if(event.status) {  
+                            $scope.fieldList = result;
+                            $scope.fieldListTemp = angular.copy($scope.fieldList);
+                            $scope.setDefault($scope.fieldList);
+                            $scope.sort('fw.objLabel');
+                        }
+                        $scope.modalShown = false;
+                        $scope.$apply();    
+                    },{escape: false}
+                );               
+            } 
+            
+            var doc = document.documentElement;
+            var left = 0;
+            var top = 0;
+            
+            $scope.getScrollPosition = function() {
+                left = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
+                top = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
+            }
+            
+            $scope.findSensitiveButton = function(){                
+                $scope.getScrollPosition();
+                $scope.dataTypes = [];
+                for(var i=0; i < $scope.dataTypeList.length;i++){
+                    $scope.dataTypes.push({"name":$scope.dataTypeList[i],"isChecked":false});
+                }
+            
+                $scope.accInput = {};
+                $scope.accInput.other = null;
+                $scope.isOtherSelected = false;
+                
+                $scope.inputWindow = true; 
+                
+                window.scrollTo(0,0);
+            } 
+            
+            $scope.isOtherSelected = false;
+            $scope.selectCheckbox = function(name,isChecked){
+                if(name == 'Other'){
+                    if(isChecked){
+                        $scope.isOtherSelected = true;
+                    }
+                    else{
+                        $scope.isOtherSelected = false;
+                    }
+                }
+            }
+            
+            $scope.accInput = {};
+            $scope.accInput.selectedDataType = null;
+            $scope.accInput.other = null;
+            $scope.runAccelerator = function(){
+                $scope.setDatatypeValues();
+                if($scope.accInput.selectedDataType == null && ($scope.accInput.other == null || $scope.accInput.other == '')){
+                    alert('Please provide the required fields to continue.');
+                    return;
+                }
+                if($scope.isOtherSelected && ($scope.accInput.other == null || $scope.accInput.other == '') ){
+                    alert('Please provide the required fields to continue.');
+                    return;
+               }
+                
+                var objName;
+                if($scope.sObject == 'All'){
+                    objName = 'All';
+                }
+                else{
+                    var objName = $scope.sObjMap[$scope.sObject];
+                }
+                
+                $scope.accInput.objType = $scope.sObjType;
+                $scope.accInput.sObj = objName;
+                
+                $scope.modalShown = true;
+                Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.SFIAcceleratorController.runAccelerator}',$scope.accInput,
+                    function(result, event) {
+                        if(event.status) {  
+                            $scope.fieldList = result; 
+                        }
+                        $scope.modalShown = false;
+                        $scope.inputWindow = false; 
+                        $scope.$apply();    
+                    },{escape: false}
+                );     
+            }
+            
+            $scope.setDatatypeValues = function(){ 
+                $scope.accInput.selectedDataType = null;
+                for(var i=0; i<$scope.dataTypes.length; i++){
+                    if($scope.dataTypes[i].isChecked){
+                        if($scope.accInput.selectedDataType == null){
+                            $scope.accInput.selectedDataType = $scope.dataTypes[i].name;
+                        } 
+                        else{
+                            $scope.accInput.selectedDataType = $scope.accInput.selectedDataType +','+$scope.dataTypes[i].name;
+                        } 
+                    }  
+                }
+            } 
+            
+            $scope.datalist = [];
+            var emailCount;
+            $scope.assignDataList = function(){   
+                emailCount = 0;
+                for(var i=0; i<$scope.fieldList.length; i++){
+                    $scope.result = angular.equals($scope.fieldList[i], $scope.fieldListTemp[i]);
+                    if(!$scope.result){
+                        var data = {fName: $scope.fieldList[i].fw.fApi, 
+                                    objName: $scope.fieldList[i].fw.objApi,
+                                    isSensitive: $scope.fieldList[i].fw.isSensitive,
+                                    comments: $scope.fieldList[i].fw.comments
+                                    };
+                        
+                        $scope.datalist.push(data);
+                    }
+                    if($scope.fieldList[i].fw.isSensitive){
+                        emailCount++;
+                    }
+                }
+            }
+            
+            $scope.saveButton = function(){
+                $scope.datalist = [];
+                $scope.assignDataList();
+                if($scope.datalist.length == 0){
+                    alert('The data could not be saved as no changes were made.'); 
+                    return false;
+                }
+                $scope.modalShown = true;
+               Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.SFIAcceleratorController.saveData}',$scope.datalist,
+                    function(result, event) {
+                        if(event.status) {  
+                            alert('Saved successfully.');
+                            $scope.fieldListTemp = angular.copy($scope.fieldList);
+                        }
+                        else{
+                            $scope.fieldListTemp = [];
+                        }
+                        $scope.modalShown = false;
+                        $scope.$apply();    
+                    },{escape: false}
+                );    
+            }
+            
+            $scope.uInfo = {};
+            $scope.saveAndSendEmailButton = function(){
+                $scope.getScrollPosition();
+                $scope.datalist = [];
+                $scope.assignDataList();
+                if(emailCount == 0){
+                    alert('At least one field should be marked as sensitive to send an email.');
+                    return;
+                }
+                $scope.emailWindow = true;
+                $scope.uInfo.name = null;
+                $scope.uInfo.email = null;
+                
+                window.scrollTo(0,0);
+            }
+            
+            $scope.continueButton = function(){
+                if($scope.uInfo.name == null || $scope.uInfo.name == '' 
+                                            || $scope.uInfo.email == null || $scope.uInfo.email == ''){
+                    alert('Please provide the required fields to continue.');
+                    return;
+                }
+                if(!isEmail($scope.uInfo.email)){
+                    alert('Please provide a valid email address.');
+                    return;    
+                }  
+
+                $scope.modalShown = true;
+                Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.SFIAcceleratorController.saveAndSendEmailData}',$scope.datalist,$scope.uInfo.email,$scope.uInfo.name,
+                    function(result, event) {
+                        if(event.status) {  
+                           alert('An email has been sent successfully.');
+                           $scope.fieldListTemp = angular.copy($scope.fieldList);
+                        }
+                        else{
+                            $scope.fieldListTemp = [];
+                        }
+                        $scope.modalShown = false;
+                        $scope.emailWindow = false;
+                        $scope.$apply();    
+                    },{escape: false}
+                );    
+            }
+            
+            $scope.sampleData = [];
+            $scope.generateReportButton = function(){
+              
+                var objName;
+                if($scope.sObject == 'All'){
+                    objName = 'All';
+                }
+                else{
+                    var objName = $scope.sObjMap[$scope.sObject];
+                }
+                $scope.modalShown = true;
+                Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.SFIAcceleratorController.exportToXL}',$scope.sObjType,objName,
+                    function(result, event) {
+                        if(event.status){  
+                           $scope.sampleData = result;
+
+                           var csvname= 'SensitiveFieldsReport'+'.xls';
+                           var encodedUri = encodeURI(result);       
+                           var re1 = new RegExp('&amp;', 'g');       
+                           var re = new RegExp('#39;', 'g');
+                           encodedUri = encodedUri.replace(re, "'");
+                           encodedUri = encodedUri.replace(/&/g, '');
+                           encodedUri = encodedUri.replace(/amp;/g, '');
+                           var a = document.createElement("a");
+                           a.href = 'data:attachment/csv,' +encodedUri;
+                           a.download = csvname;
+                           document.body.appendChild(a); // Required for FF
+                             
+                           a.click(); 
+                        }
+                        $scope.modalShown = false;
+                        $scope.$apply();    
+                    },{escape: false}
+                );               
+            };
+            
+            $scope.refList = [];
+            $scope.isUsedClicked = function(fApi){
+                $scope.getScrollPosition();
+                $scope.modalShown = true;
+                Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.SFIAcceleratorController.getRefList}',fApi,
+                    function(result, event) {
+                        if(event.status){  
+                            $scope.refWindow = true;
+                            $scope.refList = result; 
+                        }
+                        $scope.modalShown = false;
+                        $scope.$apply();    
+                    },{escape: false}
+                );               
+                window.scrollTo(0,0);
+            }
+        }]);
+        
+        function isEmail(email) {
+            var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+            return regex.test(email);
+        }
+        
+        function openNav() {
+            document.getElementById("myNav").style.width = "40%";
+        }
+        
+        function closeNav() {
+            document.getElementById("myNav").style.width = "0%";
+        }
+    </script>
+    <div ng-app="MyApp" class="ng-cloak" style="height:100vh;">
+    <div ng-controller="SFIAcceleratorController" data-ng-init="pageInit()">
+        <c:SchemaHeader ></c:SchemaHeader>
+        <div class="container" style="margin-top:30px">
+            <div class="form-group">
+                <label >Select Object</label>
+                <select ng-model="sObjType" class="form-control" ng-options="val for val in sObjectType" ng-change="getObjectInformation()"> 
+                </select>
+            </div>  
+            <div class="form-group" ng-show="sObjType != 'Select'">
+                <select ng-model="sObject" class="form-control" ng-options="val for val in sObjectList" ng-change="getFieldInformation()"> 
+                </select>  
+            </div>
+        </div>
+        <div class="container" style="margin-top:30px" ng-show="sObject != null && sObject != 'Select'">
+            
+            
+            <div class="row" style="margin-top:20px;">
+                <div class="col-md-3">
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <label >Show</label>
+                            <select ng-model="pageSize" value ="{{o}}" class="form-control" ng-options="i for i in pageSizeValues" ng-change="pazeSizeChange()"></select>
+                            <label >entries</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-6" align="center">
+                    <input type="button" class="btn" value="Find Sensitive Fields" ng-click="findSensitiveButton()"></input>
+                    <input type="button" class="btn" value="Save" ng-click="saveButton()"></input>
+                    <input type="button" class="btn" value="Save & Send Email" ng-click="saveAndSendEmailButton()"></input>
+                    <input type="button" class="btn" value="Generate Report" ng-click="generateReportButton()"></input>
+                </div>
+                <div class="col-md-3">
+                    <span class="pull-right">
+                        <form class="form-inline">
+                        <div class="form-group">
+                            <label >Search</label>
+                            <input id="searchtext" type="text" ng-model="searchText" class="form-control" placeholder="Search" ng-keyup="searchChange();"/>
+                        </div>
+                        </form>
+                    </span>
+                </div>
+            </div>
+            <div width="100%">
+            <table border="1px" style="margin-top:10px;width:100%;table-layout: fixed;" class="table table-hover table-striped table-inverse">
+                <thead class="thead-inverse" style="background-color: skyblue;">
+                    <tr style="width:100%;">
+                        <th width="14%" ng-click="sort('fw.objLabel')" style="text-align: center;">Object Name
+                        <span class="glyphicon sort-icon" ng-show="sortKey=='fw.objLabel'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                        </th>
+                        <th width="14%" ng-click="sort('fw.fLabel')" style="text-align: center;">Field Name
+                        <span class="glyphicon sort-icon" ng-show="sortKey=='fw.fLabel'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                        </th>
+                        <th width="18%" ng-click="sort('fw.fApi')" style="text-align: center;">Field API
+                        <span class="glyphicon sort-icon" ng-show="sortKey=='fw.fApi'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                        </th>
+                        <th width="12%" ng-click="sort('fw.fDataType')" style="text-align: center;">Data Type
+                        <span class="glyphicon sort-icon" ng-show="sortKey=='fw.fDataType'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                        </th>
+                        <th width="8%" ng-click="sort('fw.isEncrypted')" style="text-align: center;">Is Encrypted?
+                        <span class="glyphicon sort-icon" ng-show="sortKey=='fw.isEncrypted'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                        </th>
+                        <th width="8%" ng-click="sort('isUsed')" style="text-align: center;">Is Referenced?
+                       <span class="glyphicon sort-icon" ng-show="sortKey=='isUsed'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                        </th>
+                        <th width="8%" ng-click="sort('fw.isSensitive')" style="text-align: center;">Is Sensitive Field?
+                        <span class="glyphicon sort-icon" ng-show="sortKey=='fw.isSensitive'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                        </th>
+                        <th width="18%" ng-click="sort('fw.comments')" style="text-align: center;">Comments
+                        <span class="glyphicon sort-icon" ng-show="sortKey=='fw.comments'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="rec in (filteredItems =  (fieldList|orderBy:sortKey:reverse|filter:search) |pagination: curPage * pageSize | limitTo:pageSize)" style="width:100%;">
+                        <td width="14%" align="center" style="vertical-align: middle;">
+                        {{rec.fw.objLabel}}
+                        <a href="#" data-toggle="tooltip" title="{{rec.fw.objApi}}">
+                        <span class="glyphicon glyphicon-info-sign"></span></a>
+                        </td>
+                        <td width="14%" align="center" style="vertical-align: middle;">{{rec.fw.fLabel}}</td>
+                        <td width="18%" align="center" style="vertical-align: middle;">{{rec.fw.fApi}}</td>
+                        <td width="12%" align="center" style="vertical-align: middle;">{{rec.fw.fDataType}}</td>
+                        <td width="8%" align="center" style="vertical-align: middle;">{{rec.fw.isEncrypted ? 'Yes' : 'No'}}</td>
+                        <td width="8%" align="center" style="vertical-align: middle;">
+                            <a href="#" ng-show="rec.isUsed" ng-click="isUsedClicked(rec.fw.fApi)">{{rec.isUsed ? 'Yes' : 'No'}}</a>
+                            <label style="font-weight: normal;" ng-show="!rec.isUsed">{{rec.isUsed ? 'Yes' : 'No'}}</label>
+                        </td>
+                        <td width="8%" align="center" style="vertical-align: middle;">
+                            <input type="checkbox" ng-disabled = "rec.fw.isEncrypted" name="{{$index}}" ng-model="rec.fw.isSensitive" ng-true-value="true" ng-false-value="false" ng-click="checkboxSelectClick(rec,rec.isChecked);"/>
+                        </td>
+                        <td width="18%" align="center" style="vertical-align: middle;">
+                            <textarea rows="2" cols="50" data-toggle="tooltip" title="{{rec.fw.comments}}" maxlength="1000" id="Comments" ng-model="rec.fw.comments" style="width:90%;resize: none;"/>
+                        </td>
+                    </tr>
+                    <tr height="30px" ng-show="searchText != null && searchText != '' && filteredItems != null && filteredItems.length == 0">
+                        <td colspan="8" align="center" style="vertical-align:middle"> 
+                        No matching records found
+                        </td>
+                    </tr>
+                     <tr height="30px" ng-show="(searchText == null || searchText == '') && filteredItems != null && filteredItems.length == 0">
+                        <td colspan="8" align="center" style="vertical-align:middle"> 
+                        No data available in table
+                        </td>
+                    </tr>
+    
+                </tbody>
+            </table> 
+            <div class="row" ng-show="filteredItems != null && filteredItems.length > 0">
+                <div class="col-md-6">
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <label>Showing {{firstRec}} to {{lastRec}} of {{totalRec}} entries</label>
+                            <label ng-show="searchText != null && searchText != ''">(filtered from {{total}} total entries)</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <span class="pull-right" ng-show="filteredItems != null && filteredItems.length > pageSize">
+                        <form class="form-inline">
+                        <div class="form-group">
+    
+                      <button type="button" class="btn btn-primary" ng-disabled="curPage == 0" ng-click="PreviousClick()">PREV</button>
+                       <span>Page {{curPage + 1}} of {{numberOfPages()}}</span>
+    
+                       <button type="button" class="btn btn-primary" ng-disabled="curPage >= filteredItems.length/pageSize - 1" ng-click="nextClick()">NEXT</button>
+    
+                        </div>
+                        </form>
+                    </span>
+                </div>
+            </div>
+            </div>
+        </div>
+         <div>
+            <modal-dialog show='modalShown' type='Loading'>
+                <div class="bar">
+                <p>loading</p>
+                </div>
+            </modal-dialog> 
+        </div>
+        <div>
+            <modal-dialog show='inputWindow' width="50%" style="height:100%;max-height:200px;" type='inputWindow'>
+                <apex:form style="padding:20px;">
+                    <div class="col-md-12" align="center">
+                        <input type="button" class="btn" value="Run Accelerator" ng-click="runAccelerator()"></input>
+                    </div>
+                    <div class="form-group" style="margin-top:15px;">
+                        <label for="inputs">Select Data Types<abbr class="req">*</abbr></label>
+                        <div class="checkbox">
+                            <label ng-repeat="x in dataTypes">
+                                <input type="checkbox" ng-model="x.isChecked" ng-click="selectCheckbox(x.name,x.isChecked)"/> {{x.name}} &nbsp;&nbsp;
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-show="isOtherSelected">
+                        <label for="Other">Other inputs(For label comparision)<abbr class="req">*</abbr></label>
+                        <textarea class="form-control" rows="3" id="Other" ng-model="accInput.other" style="max-width: 90%; max-height: 150px;"></textarea>
+                    </div>
+                </apex:form>
+            </modal-dialog>
+        </div>
+        <div>
+            <modal-dialog show='emailWindow' width="50%" style="height:100%;max-height:200px;" type='emailWindow'>
+                <apex:form style="padding:20px;">
+                    <div class="col-md-12" align="center">
+                        <input type="button" class="btn" value="Continue" ng-click="continueButton()"></input>
+                    </div>
+                    <div class="form-group" style="margin-top:15px;">
+                        <label >Name<abbr class="req">*</abbr></label>
+                        <input type="text" class="form-control" ng-model="uInfo.name"/>
+                    </div>
+                    <div class="form-group" style="margin-top:15px;">
+                        <label >Email<abbr class="req">*</abbr></label>
+                        <input type="text" class="form-control" ng-model="uInfo.email"/>
+                    </div>
+                </apex:form>
+            </modal-dialog>
+        </div>
+        
+        <div>
+            <modal-dialog show='refWindow' width="60%" style="height:100%;max-height:500px;" type='refWindow'>
+                <apex:form style="padding:20px;">
+                    <div width="100%">
+                    <apex:outputPanel layout="block" style="max-height:500px;overflow:auto;width:100%;" >
+                        <table border="1px" style="margin-top:10px;width:100%;table-layout: fixed;" class="table table-hover table-striped table-inverse">
+                            <thead class="thead-inverse" style="background-color: skyblue;">
+                                <tr style="width:100%;">
+                                    <th width="70%" style="text-align: center;">Name</th>
+                                    <th width="30%" style="text-align: center;">Type</th>
+                                </tr>   
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="rec in refList" style="width:100%;">
+                                    <td width="14%" align="center" style="vertical-align: middle;">{{rec.name}}</td>
+                                    <td width="18%" align="center" style="vertical-align: middle;">{{rec.type}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </apex:outputPanel>
+                    </div>
+                </apex:form>
+            </modal-dialog>
+        </div>
+        
+        <div id="myNav" class="overlay">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+            <div class="container overlay-content" >
+                <c:SchemaAbout />      
+            </div>
+        </div>
+    </div>
+    </div>
+</apex:page>

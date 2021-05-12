@@ -1,0 +1,32 @@
+<aura:component implements="flexipage:availableForAllPageTypes" 
+                controller="MFA_LoginFlowController" 
+                access="global">
+    <aura:attribute name="MFASettings" type="Object" access="global"/>
+    <aura:attribute name="userIdentity" type="Object" access="global"/>
+    <aura:attribute name="IdentityOptions" type="List" />
+    <aura:attribute name="selectedIdentity" type="String" access="global" default="Email"/>
+    <aura:attribute name="spinner" type="boolean" default="false"/>
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" /> 
+    <aura:registerEvent name="MFAScreenEvent" type="c:MFA_ScreenEvent" />
+    
+    <b>How would you like to confirm your identity?</b>
+    <lightning:radioGroup aura:id="IdentityGroup" name="IdentityGroup"
+                          label=""
+                          options="{! v.IdentityOptions}"
+                          value="{! v.selectedIdentity}"/>
+    
+    <div align="right" style="padding-top:10px;">
+        <lightning:button label="Continue" class="btn btn-primary btnCls" onclick="{!c.continueClick}"></lightning:button>
+    </div>
+    
+    <aura:if isTrue="{!v.spinner}">
+        <div aura:id="spinnerId" class="slds-spinner_container">
+            <div class="slds-spinner slds-spinner--large slds-is-relative" role="alert">
+                <span class="slds-assistive-text">Loading</span>
+                <div class="slds-spinner__dot-a"></div>
+                <div class="slds-spinner__dot-b"></div>
+            </div>
+        </div>
+    </aura:if>  
+</aura:component>

@@ -1,0 +1,8 @@
+<template>
+    <div>
+        <lightning-input type="search" onchange={handleKeyChange} class="slds-m-bottom_small" label="Search"  
+         value={searchKey}></lightning-input>  
+    </div>
+    <lightning-datatable data={data} columns={columns} key-field="Id">
+    </lightning-datatable>
+</template>

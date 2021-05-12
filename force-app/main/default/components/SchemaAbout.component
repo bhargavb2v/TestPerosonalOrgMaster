@@ -1,0 +1,19 @@
+<apex:component >
+    <style>
+         .form-style-2-heading{
+            font-weight: bold;
+            font-style: italic;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 5px;
+            margin-top: 15px;
+            font-size: 15px;
+            padding-bottom: 3px;
+        }
+    </style>
+    <div class="form-style-2-heading">About</div>
+    Any sensitive field that could potentially identify a specific individual and is used to distinguish one person from another should be transmitted in an encrypted format, so that there is no harm to any individual’s PII.<br/><br/>
+            Sensitive PII is information which, when disclosed, could result in harm to the individual whose privacy has been breached. Sensitive PII should therefore be encrypted in transit and when data is at rest. To enable encryption on the sensitive PII, any application would require a process that could potentially identify the sensitive fields used in the application.<br/><br/> 
+            This accelerator will be capable of doing a first level identification of the sensitive fields used in an application before that could be encrypted. This application will also allow the user to generate report of the sensitive fields and send it to the client for verification. <br/><br/>
+            This accelerator can be further leveraged to accelerate the encryption process and generate report on encryption status.  
+            
+</apex:component>

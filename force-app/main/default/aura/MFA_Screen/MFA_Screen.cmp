@@ -1,0 +1,27 @@
+<aura:component access="global">
+	<aura:attribute name="resultWrapper" type="string" access="global"/>
+    <aura:attribute name="MFASettings" type="Object" access="global"/>
+    <aura:attribute name="userIdentity" type="Object" access="global"/>
+
+    <aura:attribute name="IdentitySelectionScreen" type="Boolean" default="false"/>
+    <aura:attribute name="IdentityConfirmationScreen" type="Boolean" default="false"/>
+    <aura:attribute name="selectedIdentity" type="String" access="global"/>
+    <aura:attribute name="qrWrapper" type="Object" access="global"/>
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    <aura:handler name="MFAScreenEvent" event="c:MFA_ScreenEvent" 
+                  					action="{!c.handleScreenEvent}"/>
+    
+    <aura:if isTrue="{!v.IdentitySelectionScreen}">
+    	<c:MFA_IdentitySelectionScreen MFASettings="{!v.MFASettings}" 
+                                       userIdentity="{!v.userIdentity}"/>
+        									
+    </aura:if>
+    <aura:if isTrue="{!v.IdentityConfirmationScreen}">
+    	<c:MFA_ConfirmationScreen MFASettings="{!v.MFASettings}" 
+                                  userIdentity="{!v.userIdentity}"
+                                  selectedIdentity="{!v.selectedIdentity}" 
+                                  qrWrapper="{!v.qrWrapper}"/>
+        									
+    </aura:if>
+</aura:component>

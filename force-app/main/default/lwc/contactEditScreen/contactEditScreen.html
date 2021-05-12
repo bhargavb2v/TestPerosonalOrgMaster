@@ -1,0 +1,12 @@
+<template>
+        <lightning-input type="text" name="firstname" label="First Name" value={conFirstName} 
+        onchange={firstnameChange}></lightning-input>
+        <lightning-input type="text" name="lastname" label="Last Name" value={conLastName} 
+        onchange={lastnameChange}></lightning-input>
+
+        <!-- modal footer start-->
+        <footer class="slds-modal__footer">
+            <button class="slds-button slds-button_neutral" onclick={closeModal}>Cancel</button>
+            <button class="slds-button slds-button_neutral" onclick={updateContact}>Save</button>
+        </footer>
+</template>

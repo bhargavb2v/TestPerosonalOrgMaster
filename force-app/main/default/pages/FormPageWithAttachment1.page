@@ -1,0 +1,521 @@
+<apex:page showHeader="false" controller="FormPageWithAttachment1Controller" sidebar="false" standardStylesheets="false" docType="html-5.0" language="en-US" applyHTMLTag="false">
+    <!-- Reference files Bootstrap and Jquery -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!-- Session Id -->
+    <apex:includeScript value="/soap/ajax/29.0/connection.js"/>
+<apex:includeScript value="/soap/ajax/29.0/apex.js"/>
+    <script type="text/javascript">
+        sforce.connection.sessionId = '{!$Api.Session_ID}';
+    </script>
+    
+    <!-- Styles Start-->
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 300;
+        }
+
+        p {
+            color: #999;
+        }
+
+        strong {
+            color: #333;
+        }
+
+        #wrapper {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 30px 0;
+        }
+    
+        .page-head-image {
+          
+        }
+    
+        .page-head-image img {
+            border-radius: 50%;
+        }
+    
+        #form-trabalhe {
+            margin-top: 30px;
+            text-align: left;
+        }
+    
+        label {
+            font-weight: normal;
+            margin-top: 15px;
+            display: block;
+        }
+    
+        input {
+            border: 2px solid #CCC !important;
+            height: 35px;
+            border-radius: 3px;
+            max-width: 100%;
+        }
+    
+        .input-group-addon {
+            border: 2px solid #CCC !important;
+            border-right: 0px !important;
+        }
+    
+        .btn {
+            border: 0;
+            border-radius: 3px;
+            margin-top: 20px;
+        }
+    
+        .form-group {
+            margin-bottom: 0;
+            text-align: left;
+        }
+        .required input {
+            padding-right: 25px;
+            background-image: url(...);
+            background-position: right top;
+        }
+
+    </style>
+    <!-- Styles End-->
+    
+    <!-- Scripts Start-->
+    <script>
+        var maxStringSize = 6000000;    //Maximum String size is 6,000,000 characters
+        var maxFileSize = 4350000;      //After Base64 Encoding, this is the max file size
+        var chunkSize = 950000;         //Maximum Javascript Remoting message size is 1,000,000 characters
+        var attachment;
+        var attachmentName;
+        var fileSize;
+        var positionIndex;
+        var doneUploading;
+        $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip(); 
+            $("#myModal").modal('hide'); 
+            console.log('{!$Api.Session_ID}');
+        });
+        
+        function modalOkClick(){
+            location.reload(true);
+        }
+        
+        function errormodalOkClick(){
+            $("#errorModal").modal('hide');    
+        }
+        
+        //Save button click action
+        function saveClick(){
+            var campName = $("#campName").val();
+            var channel = $("#channel").val();
+            if(campName != null && campName != '' && channel != null && channel != ''){
+                $("#errorMsg").text("");
+                var campObj = {"brand":$("#brand").val(),"conGroup":$("#conGroup").val(),"promoType":$("#promoType").val(),
+                                "campName":$("#campName").val(),"campCadence":$("#campCadence").val(),
+                                "channel":$("#channel").val(),"tldDate":$("#tldDate").val(),
+                                "campOPManager":$("#campOPManager").val(),"bManager":$("#bManager").val(),
+                                "mAttend":$("#mAttend").val(),"comm":$("#comm").val(),"tdDateText":$("#tdDateText").val()};
+                console.log(campObj);
+                var myJSON = JSON.stringify(campObj);
+                uploadFiles(myJSON);
+            }
+            else{
+                $("#errorMsg").text("Please provide the required fields. Which are indicated with asterisk(*)");
+            }
+        }
+        
+        //Uplad form data to server(Campaign object)
+        function uploadFiles(myJSON) {
+            var files = $("#mFiles").prop('files');
+            var fileCount = files.length;
+            
+            Visualforce.remoting.Manager.invokeAction(
+                '{!$RemoteAction.FormPageWithAttachment1Controller.saveCampaing}',
+                myJSON,function(result, event) {
+                    var successMessage = "Form submittes successfully";
+                    var errorMessage = "Sorry, there was a problem submitting the form. Please try again or contact System Administrator";
+                    var exceptionMessage = "Sorry, there was a problem submitting the form. Please contact System Administrator";
+                    if(event.type === 'exception') {
+                        $("#errorMessage").text(exceptionMessage);
+                        $("#errorModal").modal('show');
+                    } else if(event.status) {
+                        if (result) {
+                           console.log(result);
+                           var parentId = result;
+                           if(fileCount > 0){
+                               uploadAttachments(parentId);
+                           }
+                           else{
+                               $("#successModal").modal('show');
+                           }
+                        } else {
+                            $("#errorMessage").text(errorMessage);
+                            $("#errorModal").modal('show');
+                        }
+                    } else {
+                        $("#errorMessage").text(errorMessage);
+                        $("#errorModal").modal('show');
+                    }
+                },
+                {buffer: false, escape: true, timeout: 120000}
+            );
+        } 
+        
+        //To upload attachements, getting fiels form input file
+        function uploadAttachments(parentId) {
+            var files = $("#mFiles").prop('files');
+            var fileCount = files.length;
+            for (var i = 0; i < files.length; i++){
+                addAttachment(files[i],parentId,i+1,fileCount);
+            }
+        }
+        
+        //Create attachement into server Attachment object
+        function addAttachment(file,parentId,fileNo,fileCount){
+            var reader = new FileReader();
+            var attachFile = file;
+            if(attachFile == undefined){
+                alert('Attachment required to proceed');
+                return;
+            }
+            
+            if(attachFile.size >= maxFileSize) {
+                $("#errorMessage").text('Attachment size not supported');
+                $("#errorModal").modal('show');
+                return;
+            }
+            
+            attachmentName = file.name; 
+            reader.onload = function(e) {
+                attachment = window.btoa(e.target.result);  //Base 64 encode the file before sending it
+                positionIndex = 0;
+                fileSize = attachment.length;
+                console.log("Total Attachment Length: " + fileSize);
+                doneUploading = false;
+                if(fileSize < maxStringSize) {
+                  uploadAttachment(parentId,attachment,file.name,fileNo,fileCount);
+                } else {
+                    var msg = file.name+" - Base 64 Encoded file is too large.  Maximum size is " + maxStringSize + " your file is " + fileSize + ".";
+                    $("#errorMessage").text(msg);
+                    $("#errorModal").modal('show');
+                }
+                
+            };
+            reader.readAsBinaryString(attachFile);
+         
+        }
+        
+        function uploadAttachment(parentId,file,attName,fileNo,fileCount) {
+          var attachmentBody = "";
+          if(fileSize <= positionIndex + chunkSize) {
+            attachmentBody = file.substring(positionIndex);
+            doneUploading = true;
+          } else {
+            attachmentBody = file.substring(positionIndex, positionIndex + chunkSize);
+          }
+          
+          Visualforce.remoting.Manager.invokeAction(
+                '{!$RemoteAction.FormPageWithAttachment1Controller.createAttachment}',
+                parentId,attachmentBody,attName,function(result, event) {
+                    var successMessage = "Form submittes successfully";
+                    var errorMessage = "Sorry, there was a problem submitting the form. Please try again or contact System Administrator";
+                    var exceptionMessage = "Sorry, there was a problem submitting the form. Please contact System Administrator";
+                    if(event.type === 'exception') {
+                        $("#errorMessage").text(exceptionMessage);
+                        $("#errorModal").modal('show');
+                    } else if(event.status) {
+                        if (result) {
+                           if(fileNo == fileCount){
+                               $("#successModal").modal('show');
+                           }
+                        } else {
+                            $("#errorMessage").text(errorMessage);
+                            $("#errorModal").modal('show');
+                        }
+                    } else {
+                        $("#errorMessage").text(errorMessage);
+                        $("#errorModal").modal('show');
+                    }
+                },
+                {buffer: false, escape: true, timeout: 120000}
+            );
+          
+          
+        }
+        
+        //Prepare selcted files to display on page
+        updateList = function() {
+            var input = document.getElementById('mFiles');
+            var output = document.getElementById('fileList');
+            
+            output.innerHTML = '<ul>';
+            for (var i = 0; i < input.files.length; ++i) {
+            output.innerHTML += '<li>' + input.files.item(i).name + '</li>';
+            
+            }
+            output.innerHTML += '</ul>';
+            if(input.files.length>0){
+              $("#selctedFile").show();
+            }
+            else{
+              $("#selctedFile").hide();
+            }
+        } 
+    </script>
+    <!-- Scripts End-->
+    
+    <!-- Parent Form starts -->
+    <apex:form >
+    <div id="wrapper" class="container">
+        <h1 align="center">Intake Form</h1>
+        <hr size="20" style="height:2px;color:#333;"/>
+        <form id="form-work" class="" name="form-work" action="#">
+        <div id="successModal" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Intake Form success</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Thank you for submitting the Intake Form.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" onclick="modalOkClick()">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="errorModal" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Error</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p id="errorMessage"/>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" onclick="errormodalOkClick()">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>        
+        
+        
+        <fieldset>   
+            <!-- Brand filed picklist Starts-->
+            <div class="form-group">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="brand">Brand​<font color="red">*</font></label>
+                        <select class="form-control" id="brand" required="true">
+                            <apex:repeat value="{!brandList}" var="brand">
+                            <option>{!brand}</option>
+                            </apex:repeat>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <!-- Brand filed picklist Ends-->
+            
+            <!-- Consumer Group picklist Starts-->
+            <div class="form-group">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="conGroup">Consumer Group<font color="red">*</font>​​</label>
+                        <select class="form-control" id="conGroup" required="true">
+                            <apex:repeat value="{!consumerGroupList}" var="group">
+                            <option>{!group}</option>
+                            </apex:repeat>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <!-- Consumer Group picklist Ends-->
+            
+            <!-- Promotion Type picklist Starts-->
+            <div class="form-group">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="promoType">Promotion Type<font color="red">*</font>​</label>
+                        <select class="form-control" id="promoType" required="true">
+                            <apex:repeat value="{!promotionTypeList}" var="pType">
+                            <option>{!pType}</option>
+                            </apex:repeat>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <!-- Promotion Type picklist Ends-->
+            
+            <!-- Campaign Name​e free text Starts-->
+            <div class="form-group">
+                <div class="col-md-6">
+                    <label class="control-label" for="campName">Campaign Name​<font color="red">*</font></label>
+                    <input name="campName" maxlength="100" required="true" id="campName" class="form-control" placeholder="Campaign Name" type="text"/>
+                </div>
+            </div>
+            <!-- Campaign Name​e free text Ends-->
+            
+            <!-- Campaign Cadence picklist Starts-->
+            <div class="form-group">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="campCadence">Campaign Cadence​​<font color="red">*</font></label>
+                        <select class="form-control" id="campCadence">
+                            <apex:repeat value="{!campCadenceList}" var="cad">
+                            <option>{!cad}</option>
+                            </apex:repeat>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <!-- Campaign Cadence picklist Ends-->
+            
+            <!-- Target Launch/​Deployment Date  Starts-->
+             <div class="form-group">
+                <div class="col-md-6">
+                    <label class="control-label" for="tldDate">Target Launch/​Deployment Date​</label>
+                    <input name="tldDate" id="tldDate" class="form-control" placeholder="Date" type="Date"/>
+                </div>
+            </div>
+            <!-- Target Launch/​Deployment Date Ends-->
+        
+            <!-- Target Launch Date free text Starts-->
+            <div class="form-group">
+                <div class="col-md-6">
+                    <label class="control-label" for="tdDateText">Target Launch Date</label>
+                    <input name="tdDateText" id="tdDateText" class="form-control" placeholder="Target Launch Date" type="text"/>
+                </div>
+            </div>
+            <!-- Target Launch Date free text Ends -->
+        
+            <!-- Channels Multi Select Picklist Starts-->
+            <div class="form-group">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="channel">Channels<font color="red">*</font>
+                        <a href="#" data-toggle="tooltip" title="Press Ctrl to select multiple values">
+                        <i class='glyphicon glyphicon-info-sign'></i></a>
+                        </label>
+                        <select class="form-control" id="channel" multiple="true" required="true">
+                            <apex:repeat value="{!commChannelList}" var="channel">
+                            <option>{!channel}</option>
+                            </apex:repeat>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <!-- Channels Multi Select Picklist Ends-->
+    
+            <!-- Campaign Ops Manager free text Starts-->
+            <div class="form-group">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="control-label" for="campOPManager">Campaign Ops Manager
+                        <a href="#" data-toggle="tooltip" title="Name should be exact match. First Name <SPACE> Last Name">
+                            <i class='glyphicon glyphicon-info-sign'></i>
+                        </a>
+                        ​</label>
+                        <input name="campOPManager" maxlength="100" id="campOPManager" class="form-control" placeholder="FirstName LastName" type="text"/>
+                    </div>
+                </div>
+            </div>
+            <!-- Campaign Ops Manager free text Ends-->
+            
+            <!-- Brand Manager free text Starts-->
+            <div class="form-group">
+                <div class="col-md-6">
+                    <label class="control-label" for="bManager">Brand Manager​</label>
+                    <input name="bManager" maxlength="100" id="bManager" class="form-control" placeholder="Brand Manager" type="text"/>
+                </div>
+            </div>
+            <!-- Brand Manager free text Starts-->
+            
+            <!-- Meeting Attendees textarea Starts-->
+            <div class="form-group">
+                <div class="col-md-6">
+                    <label class="control-label" for="mAttend">Meeting Attendees​</label>
+                    <textarea name="mAttend" maxlength="500" id="mAttend" class="form-control" placeholder="Meeting Attendees​"/>
+                </div>
+            </div>
+            <!-- Meeting Attendees textarea Ends-->
+            
+            <!-- Comments textarea Starts-->
+            <div class="form-group">
+                <div class="col-md-6">
+                    <label class="control-label" for="comm">Comments​​</label>
+                    <textarea name="comm" maxlength="500" id="comm" class="form-control" placeholder="Comments​"/>
+                </div>
+            </div>
+            <!-- Comments textarea Ends-->
+        
+            <!-- BRD checkbox Starts-->
+            <div class="form-group">
+                <div class="col-md-12">
+                   <label class="checkbox-inline">
+                       <input style="margin-top: -6px;" type="checkbox" value="" id="brd" onclick="brdChange()"/> BRD
+                   </label>
+                </div>
+            </div>
+            <!-- BRD checkbox Ends-->
+            
+            <!-- File upload section Starts -->
+            <!-- It displays when BRD flag is true -->
+            <div id="showAttSection" style="display:none;">
+                <h4 align="center">File Upload </h4>
+                <hr size="20" style="height:2px;color:#333;"/>
+                <div class="form-group">
+                    <div class="col-lg-6">
+                    <div class="form-group">
+                        <label class="btn btn-primary" style="width: 80%;dispaly:inline-block !important;">
+                            Browse&hellip;  <input type="file" name="mFiles" id="mFiles" style="display: none;" multiple="true" onchange="javascript:updateList()"/>   
+                        </label>
+                        <a href="#" data-toggle="tooltip" title="Press Ctrl to select multiple files. Browse again to replace selected files.">
+                            <i class='glyphicon glyphicon-info-sign'></i>
+                        </a>
+                        </div>
+                        <!-- It displays selected fiels -->
+                        <div id="selctedFile" style="display:none;">
+                            <b>Selected files:</b>      
+                            <div id="fileList"> </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- File upload section Ends-->
+            
+            <!-- Error message-->
+            <label style="color:red;" id="errorMsg"/>
+            
+            <!-- Save button -->
+            <div class="form-group">
+                <div class="col-md-12">
+                    <button type="button" class="btn btn-primary btn-lg btn-block info" onclick="saveClick()">Save</button>
+                </div>
+            </div>  
+        </fieldset> 
+        </form>
+    </div>
+    </apex:form>
+     <!-- Parent Form Ends-->
+     
+    <!-- Scripts Start -->
+    <script>
+        function brdChange(){
+            if($('#brd').is(":checked")){
+                $("#showAttSection").show();
+            }
+            else{
+                $("#showAttSection").hide();
+            }
+        }
+    </script>
+    <!-- Scripts End-->
+</apex:page>

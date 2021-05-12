@@ -1,0 +1,175 @@
+<apex:page showHeader="false" controller="MFA_LoginFlowVFController" action="{!doInit}">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        .container-table {
+            height: 100vh;
+        }
+        .container-fluid{
+            height:100%;
+            display:table;
+            width: 100%;
+            padding: 0;
+        }
+    
+        .row-fluid {
+            height: 100%; display:table-cell; vertical-align: middle;
+        }
+
+        .centering {
+            float:none;
+            margin:0 auto;
+            width:50%;
+        }
+        .contentAlign{
+            width: 500px;
+        }
+        
+        .contnetStyle{
+            border: 1px solid lightgray;
+            padding: 20px;
+        }
+       .slds-align_absolute-center{
+            display: flex;
+            justify-content: center;
+            align-content: center;
+            align-items: center;
+            margin: auto;
+       }
+       
+       .vcenter {
+            display: inline-block;
+            vertical-align: middle;
+            float: none;
+        }
+    </style>
+    <apex:form id="form">
+    <div class="container-table">
+        <div class="container-fluid">
+        <div class="row-fluid">
+        <div class="centering">
+           <div class="row ">
+               <div class="col-lg-12" align="center">
+                <img id="theImage" src="{!$resource.MFA_SFDC_Logo}" width="220" alt="Description of image here" style="height: 150px;"/> 
+                </div>
+                <div class="col-lg-12" align="center">
+                <div class="contentAlign" align="left">
+                <apex:outputPanel id="selectIdentityScreen" rendered="{!isSelectIdentityScreen}">
+                    <div id="content" class="contnetStyle" align="left">
+                        <b>How would you like to confirm your identity?</b>
+                        <apex:selectRadio value="{!selectedIdentity}" layout="pageDirection">
+                            <apex:selectOptions value="{!IdentityOptions}"/>
+                        </apex:selectRadio>
+                    
+                        <div align="right" style="padding-top:10px;">
+                            <apex:commandButton value="Continue" action="{!continueClick}" reRender="form"/>
+                        </div>
+                    </div>
+                </apex:outputPanel>
+                
+                <apex:outputPanel id="mobileConfirmationScreen" rendered="{!isMobileConfirmationScreen}">                
+                    <div id="content" class="contnetStyle">
+                        <apex:outputPanel id="mobileConfirmationScreen1" rendered="{!userIdentity.hasRegisteredToken}"> 
+                            <div>
+                                <b>Enter Time-based Token</b><br/>
+                                {!mfaSettings.Mobile_Confirmation_Screen_Message__c}
+                            </div>
+                            <div class="form-group" style="padding-top:20px;">
+                               <label for="tokenId" style="font-weigt:normal;">Token </label>
+                               <apex:inputText label="Token" value="{!token}" id="tokenId" style="border: lightgray solid 1px;"/>
+                            </div>
+                            <apex:outputPanel id="mobErrorFlag1" rendered="{!mobileErrorFlag}">
+                                <div style="color:red">
+                                    {!mfaSettings.Mobile_Invalid_Token_Error_Message__c}
+                                </div>
+                            </apex:outputPanel>
+                            <div style="padding-top:20px;">
+                                <b>Having Trouble?</b><br/>
+                                {!mfaSettings.Having_trouble_Message__c}
+                            </div>
+                            
+                            <div style="padding-top:10px;">
+                                <apex:commandLink action="{!removeMFAaccess}">
+                                click here to connect with new mobile device.
+                                </apex:commandLink>
+                            </div>  
+                        </apex:outputPanel>
+                        <apex:outputPanel id="mobileConfirmationScreen2" rendered="{!!userIdentity.hasRegisteredToken}">
+                            <div>
+                                <b>Add a Time-based Token</b><br/>
+                                {!mfaSettings.QR_Code_Message__c}
+                            </div>
+                            <div class="row" style="display: flex; align-items: center;">
+                               <div class="col-lg-6" align="left">
+                                   <div>
+                                       <div class="form-group" style="padding-top:20px;">
+                                           <label for="regTokenId" style="font-weigt:normal;">Token </label>
+                                           <apex:inputText label="Token" value="{!regToken}" id="regTokenId" style="border: lightgray solid 1px;"/>
+                                        </div>                                        
+                                    </div>
+                               </div>
+                                <div class="col-lg-6" align="center">
+                                   <div align="center">
+                                        <div>
+                                            <img src="{!qrWrap.qr_URL}"/>
+                                        </div>
+                                    </div>
+                               </div>
+                            </div> 
+                            <apex:outputPanel id="mobErrorFlag2" rendered="{!mobileErrorFlag}">
+                                <div style="color:red">
+                                    {!mfaSettings.Mobile_Invalid_Token_Error_Message__c}
+                                </div>
+                            </apex:outputPanel>
+                        </apex:outputPanel>  
+                        
+                        <div align="right" style="padding-top:10px;">
+                            <apex:commandButton value="Back" action="{!backButtonClick}" reRender="form"/>&nbsp;
+                            <apex:commandButton value="Verify & Proceed" action="{!submitButtonClick}" reRender="form"/>
+                        </div>  
+                    </div>   
+                </apex:outputPanel> 
+                    
+                <apex:outputPanel id="EmailConfirmationScreen" rendered="{!isEmailConfirmationScreen}">                
+                    <div id="content" class="contnetStyle">
+                        <div style="{!IF(isNewCode == true, 'color:green;' , 'color:black;')}">
+                            {!emailHeaderMessage}
+                        </div>
+
+                        <div class="form-group" style="padding-top:20px;">
+                           <label for="securityCode" style="font-weigt:normal;display: block;">Verification Code </label>
+                           <apex:inputText label="Verification Code" value="{!securityCode}" id="securityCode" style="border: lightgray solid 1px;"/>
+                        </div>
+             
+                        <apex:outputPanel id="emailErrorFlag" rendered="{!emailErrorFlag}">
+                            <div style="color:red">
+                                {!mfaSettings.Email_Invalid_Code_Error_Message__c}
+                            </div>
+                        </apex:outputPanel>
+                        <div style="padding-top:20px;">
+                            <b>Didnt receive the email?</b><br/>
+                            {!mfaSettings.Email_Confirmation_Screen_SPAM_Message__c}
+                        </div>
+                        <div style="padding-top:10px;">
+                            <apex:commandLink action="{!newVerificationCodeClick}">
+                            Send me a new Verification Code
+                            </apex:commandLink>
+                        </div>   
+    
+                        <div align="right" style="padding-top:10px;">
+                            <apex:commandButton value="Back" action="{!backButtonClick}" reRender="form"/>&nbsp;
+                            <apex:commandButton value="Verify & Proceed" action="{!submitButtonClick}" reRender="form"/>
+                        </div>  
+                    </div>
+                </apex:outputPanel>
+            </div></div>
+            </div></div>
+        </div></div></div>
+    </apex:form>
+</apex:page>

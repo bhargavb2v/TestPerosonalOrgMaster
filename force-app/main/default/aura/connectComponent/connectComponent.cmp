@@ -1,0 +1,16 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global">
+     <!-- Include Static Resource-->
+    <ltng:require styles="/resource/bootstrap/bootstrap-4.0.0-alpha.6-dist/css/bootstrap.min.css" 
+                  scripts="/resource/bootstrap/bootstrap-4.0.0-alpha.6-dist/js/jquery.js,/resource/bootstrap/bootstrap-4.0.0-alpha.6-dist/js/bootstrap.min.js"/>
+	 
+	<div style="background-color:white; height:100px;color: black;font-weight: 600;padding:10px;">
+    <h3 style="color:red">CONNECT WITH TFS ON DEMAND</h3>
+     <label>
+         Log in to Connect toa access a personalized space that's designed to make it easier for you to do business with us.
+     </label>
+    <div class="row">
+    	<div class="col-sm-2"><hr style="height: 3px;background-color: skyblue;border: 0px;"></hr> </div>
+        <div class="col-sm-10"></div>
+    </div>
+    </div>
+</aura:component>

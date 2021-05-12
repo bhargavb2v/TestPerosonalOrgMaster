@@ -1,0 +1,6 @@
+<apex:component >
+    <div class="container" style="height:50px;background-color:#5DADE2;border-radius: 10px;margin-top:-5px;">
+        <label style="font-family: 'Times New Roman', Times, serif;font-size: 20px;color: white;float:left;margin-top:8px;">Sensitive Field Identification Accelerator</label>
+        <label style="font-family: 'Times New Roman', Times, serif;font-size: 20px;color: white;float:right;margin-top:8px;cursor:pointer;" onclick="openNav()" >About</label>
+    </div>
+</apex:component>

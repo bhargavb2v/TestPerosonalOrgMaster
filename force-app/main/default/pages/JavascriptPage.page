@@ -1,0 +1,29 @@
+<apex:page controller="JavascriptPage">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        function getTagValue(){
+            alert('Hi');
+            var v = document.getElementById("fName").value;
+            alert(v);
+
+            var v2 = document.getElementById("{!$Component.formId.lName}").value;
+            alert(v2);
+            document.getElementById("{!$Component.formId.lName}").value = 'Abc';
+        }
+        
+        function getTagVal1(){
+             alert($("#fName").val());
+                 
+             var a = $( 'input[id$=lName]' ).val();
+             alert(a);
+        }
+    </script>
+
+    <apex:form id="formId">
+        <input type="text" id="fName"/>
+        <apex:inputText id="lName" value="{!sVal}"/>
+        <apex:commandButton value="Submit" onclick="getTagValue()"/>
+        <apex:commandButton value="JQueryBut" onclick="getTagVal1()"/>
+    </apex:form>
+  
+</apex:page>

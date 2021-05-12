@@ -1,0 +1,4 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes">
+    <aura:attribute name="greeting" type="String" default="Hello" access="global" />
+ <img src="{!$Resource.headercar}" style="width:100%;height:120px;"/>
+</aura:component>

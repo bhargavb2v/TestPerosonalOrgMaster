@@ -1,0 +1,44 @@
+<apex:page showHeader="false" controller="MFA_LoginFlowController">
+    <apex:slds />
+    <style>
+        .contentAlign{
+            width: 500px;
+            height: 100vh;
+        }
+        
+        .contnetStyle{
+            border: 1px solid lightgray;
+            padding: 20px;
+        }
+    </style>
+    <apex:includeLightning />
+    <div class="slds-align_absolute-center contentAlign">
+        <div id="content" class="contnetStyle">
+            <div id="MFAScreen"/>
+        </div>
+    </div>
+    <script>
+        $Lightning.use("c:MFA_App", function() {
+            $Lightning.createComponent(
+                "c:MFA_Screen",
+                {
+                    resultWrapper:'{!resultJson}'
+                },
+                "MFAScreen",
+                function(cmp) {
+                    $A.eventService.addHandler({ "event": "c:MFA_AppEvent", "handler" : finishFlowMethod});
+                }  
+            );
+        });
+        
+        
+        var finishFlowMethod = function(event){
+            var myEventData = event.getParam("data");
+            FinishLoginFlow();
+        };
+    </script>
+
+  <apex:form >
+      <apex:actionFunction action="{!FinishLoginFlow}" name="FinishLoginFlow"/>
+  </apex:form>
+</apex:page>

@@ -1,0 +1,19 @@
+<template>
+    <div class="slds-m-top_medium slds-m-bottom_x-large">
+    <lightning-card title="Quick Actions">
+        <div class="slds-clearfix">
+            <div style="padding-left: 10px;">
+                <ul>
+                    <template for:each={actionList} for:item="item">
+                        <li data-name={item.Navigation_Component__c} data-id={item.Id} 
+                            key={item.Id}
+                            onclick={navigateToComp}>
+                            <a href="JavaScript:void(0)">{item.Button_Label__c}</a>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+        </div>
+    </lightning-card>
+    </div>
+</template>

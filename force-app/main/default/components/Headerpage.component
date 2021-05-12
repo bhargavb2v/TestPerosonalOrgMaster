@@ -1,0 +1,159 @@
+<apex:component >
+  <!-- <apex:component controller="Plexus_HeaderController">
+
+    <link rel="stylesheet"  href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"></link>
+    <style>
+        html{
+            min-height: 100%;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+            background: #70bg32;
+            background-repeat:no-repeat;
+            background    : #efefef; /* For browsers that do not support gradients */
+            background    : -webkit-linear-gradient(#efefef, #63bdda); /* For Safari 5.1 to 6.0 */
+            background    : -o-linear-gradient(#efefef, #63bdda); /* For Opera 11.1 to 12.0 */
+            background    : -moz-linear-gradient(#efefef, #63bdda); /* For Firefox 3.6 to 15 */
+            background    : linear-gradient(#efefef, #1695bd); /* Standard syntax */
+        }
+        body{
+            background-color: transparent;
+        }
+         .landing-container{
+            background: #ffffff;
+            margin: 0 auto;
+            padding: 15px 0;
+            border-top-left-radius: 0 !important;
+            border-radius: 10px;
+            box-shadow: 2px 2px 2px #888888;
+            width: 99%;
+            border-top-right-radius: 0;
+         }
+        .top-bar{
+            padding         : 20px 40px;
+            background-color: #3C3E3D;
+            font-size       : 1.2em;
+            color           : #C3C5C4;
+            font-weight     : bold;
+        }
+        .pull-left{
+            float           : left;
+        }
+        .pull-right{
+            float           : right;
+        }
+        .search-input{
+            border-radius   : 20px;
+            border-width    : 1px;
+            height          : 18px;
+            width           : 270px;
+            padding         : 10px;
+        }
+        .search-bar{
+            padding         : 0 15px;
+            height          : 70px;    
+        }
+        .search-bar img{
+            margin-top:15px;
+        }
+        .navigation-bar{
+            height          : 40px;
+            margin          : 0 0.5%;
+            background      : #FFFFFF; /* For browsers that do not support gradients */
+            background      : -webkit-linear-gradient(#FFFFFF, #D4EBF2); /* For Safari 5.1 to 6.0 */
+            background      : -o-linear-gradient(#FFFFFF, #D4EBF2); /* For Opera 11.1 to 12.0 */
+            background      : -moz-linear-gradient(#FFFFFF, #D4EBF2); /* For Firefox 3.6 to 15 */
+            background      : linear-gradient(#FFFFFF, #D4EBF2); /* Standard syntax */
+            border-bottom   : 5px solid #1998c1;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            background-repeat:no-repeat;
+        }   
+        .navigation-bar ul{
+            margin          : 8px 0px;
+            display         : inline-flex;
+            list-style-type : none;
+            padding         : 0 10px;
+
+        }
+        .navigation-bar ul li{
+            padding         : 0 0 0 10px;
+            margin          : 0px !important;
+        }
+        .navigation-bar ul li a {
+            font-size       : 1em;
+            text-decoration : none;
+            color           : #404E50;
+            font-weight     : bold;
+            padding         : 10px;
+        }
+        .active{
+            background      : #9ce5ff; /* For browsers that do not support gradients */
+            background      : -webkit-linear-gradient(#9ce5ff, #1797c0); /* For Safari 5.1 to 6.0 */
+            background      : -o-linear-gradient(#9ce5ff, #1797c0); /* For Opera 11.1 to 12.0 */
+            background      : -moz-linear-gradient(#9ce5ff, #1797c0); /* For Firefox 3.6 to 15 */
+            background      : linear-gradient(#9ce5ff, #1797c0); /* Standard syntax */
+            color           : #ffffff !important;  
+        }
+        .search-bar ul{
+            display         : inline-flex;
+            font-size       : 1.3em;
+            list-style-type : none;
+            margin          : 25px 15px;
+        } 
+        .search-bar ul li{
+            margin-left     : 1em !important;
+        } 
+        .search-bar ul li a{
+            text-decoration : none;
+            color           : #5880B3;
+            font-weight     : bold;
+            font-size       : 1.16em;
+        }
+        .user-bar{
+            text-align      : right;
+            margin          : 10px 15px 0 0;
+            font-size       : 1.1em;
+            font-weight     : bold;
+            color           : #867978;
+        }
+        .brand-logo{
+            position        : relative;
+            top             : 20px;
+            left            : 15px;
+            font-size       : 1.8em;
+            font-weight     : bold;
+            color           : #4f403f;
+        }
+        
+    </style>
+    <script>        
+        function setActive(li_element){
+            localStorage.setItem("activeMenu", li_element);
+        }
+    </script> 
+    <div align="right" style="padding-right: 30px; position: relative; top: 15px;">
+     <h4 style="color:#5880B3;"><b>{!loggedInUserName}</b></h4>
+    </div>
+    <div class="search-bar">
+        <span class="brand-logo"><a href="{!$page.Plexus_Home}" style="text-decoration: none;">IBD PLEXUS</a></span>
+        <span class="pull-right">
+            <ul>
+                <li><a href="{!$page.Plexus_Home}"><i class="fa fa-home" aria-hidden="true"></i> Home</a></li>
+                <li><a href="{!$page.Plexus_MyProfile}?sId={!studySFId}&myprofile=Yes"><i class="fa fa-user" aria-hidden="true"></i> My Profile</a></li>
+                <li><a href="{!$Site.Prefix}/secur/logout.jsp"><i class="fa fa-sign-out" aria-hidden="true"></i> Logout</a></li>
+            </ul>
+        </span>    
+    </div>
+    <div class="navigation-bar">
+        <ul>
+            <li style="{!IF(isPatientTab == 'Yes' && studySFId != null && studySFId != '','display:block;','display:none;')}"><a href="{!patientTabURL}" onclick="setActive(0)">Patients</a></li>
+            <li style="{!IF(isMyeCRFTab == 'Yes' && studySFId != 'Yes' && studySFId != '','display:block;','display:none;')}"><a href="{!myeCRFTabURL}" onclick="setActive(1)">My eCRFs</a></li>
+            <li style="{!IF(isPatientTab == 'Yes' && studySFId != null && studySFId != '','display:block;','display:none;')}"><a href="{!eManifestTabUrl}" onclick="setActive(2)">eManifest</a></li>
+            <li style="{!IF(isMyProfile == 'Yes','display:block;','display:none;')}"><a href="" onclick="setActive(3)">My Profile</a></li>
+        </ul>
+    </div>
+
+</apex:component> -->
+</apex:component>

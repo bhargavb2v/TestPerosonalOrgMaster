@@ -1,0 +1,47 @@
+<aura:component controller="ltngLoginpageController" 
+				implements="forceCommunity:availableForAllPageTypes" access="global" >
+	 <!-- Include Static Resource-->
+    <ltng:require styles="/resource/bootstrap/bootstrap-4.0.0-alpha.6-dist/css/bootstrap.min.css" 
+                  scripts="/resource/bootstrap/bootstrap-4.0.0-alpha.6-dist/js/jquery.js,/resource/bootstrap/bootstrap-4.0.0-alpha.6-dist/js/bootstrap.min.js"/>
+	 <!-- Define Attribute-->
+	<aura:attribute name="showError" type="Boolean" required="true" description="" default="false" access="private"/>
+    <aura:attribute name="errorMessage" type="String" required="false" description="" access="private"/>
+    <aura:attribute name="forgotPasswordUrl" type="String" required="false" default="/ForgotPassword"/>
+    <aura:attribute name="communityForgotPasswordUrl" type="String" access="private"/>
+    
+    <div style="background-color:#1F618D;">
+        <span>
+            <aura:renderIf isTrue="{!v.showError}">
+                <div id="error">
+                    <ui:outputRichText value="{!v.errorMessage}"/>
+                </div>
+            </aura:renderIf>
+        </span>   
+    <div class="container-fluid" >
+        <div align="center">
+        <label style="color:white;">LOGIN IN TO TFS DEALER CONNECT</label>
+        </div>
+        <div class="form-group">
+            <ui:inputText aura:id="username" class="form-control" value="" placeholder="User ID"/>
+        </div>
+        <div class="form-group">
+            <ui:inputSecret class="form-control" aura:id="password" value="" placeholder="Password"/>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="col-12" align="right" style="padding-right: 0px;">
+            <ui:button class="btn btn-primary btnSize" press="{!c.handleLogin}">Login</ui:button>
+        </div>
+    </div>
+    <div class="container-fluid" style="margin-top:10px;">
+        <div class="col-12" align="right" style="padding-right: 0px;">
+            <span><a href="{!if(v.communityForgotPasswordUrl == null, v.forgotPasswordUrl, v.communityForgotPasswordUrl)}"><label style="color:white;"><u>Forgot Password?</u></label></a></span>
+        </div>
+    </div> 
+        <div class="container-fluid" style="margin-top:10px;">
+        <div class="col-12" align="left" style="padding-right: 0px;">
+            <label>Not yet registered? Contact your Dealer Account Representative.</label>
+        </div>
+    </div>
+    </div>
+</aura:component>

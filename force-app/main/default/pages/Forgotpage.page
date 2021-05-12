@@ -1,0 +1,171 @@
+<apex:page >
+  <!-- <apex:page controller="Plexus_ForgotPasswordController" standardStylesheets="true" sidebar="false" showHeader="false" docType="html-5.0" >
+     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css"/>
+        <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+     <style>
+        
+         form{
+            border       : 1px solid #c5c5c5;
+            padding      : 2em 3em;
+            background   : #efefef;
+            border-radius: 3px;
+         }
+        
+         button.ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-icon-only.ui-dialog-titlebar-close:focus {
+            outline: 0 !important;
+        }
+        
+        background {
+            position: fixed;
+            top: 0px;
+            left: 0px;
+            width: 50%;
+            height: 100%;
+            background-color: pink;
+            z-index: 1;
+        }
+        
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #b1bac1;
+        }
+     </style>
+     <script>
+         
+        var app = angular.module('MyApp', []);
+        
+        app.controller('myProfileController' ,['$scope',function($scope){
+            $scope.isSuccess = false;
+            $scope.isForgot = true;
+            
+            $scope.username = '{!username}';
+             
+            $scope.pageInit = function() {  
+            
+            }
+            
+            var isBtnDisable = false; 
+            $scope.continueBtn = function(){
+                if(isBtnDisable == true){
+                    return;
+                }
+                if($scope.username == null || $scope.username == ''){
+                    $scope.errorMessage = "Username cannot be blank.";
+                    $scope.errorModalOpen();
+                    return; 
+                }
+                
+                isBtnDisable = true;
+                Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.Plexus_ForgotPasswordController.resetPassword}',$scope.username,
+                    function(result, event) {
+                        if (event.status) {
+                            if(result == 'Success'){
+                                $scope.isSuccess = true;
+                                $scope.isForgot = false;
+                            }
+                            else{
+                                $scope.errorMessage =  result;
+                                $scope.errorModalOpen();
+                            }   
+                        }
+                        else{
+                            if(event.message.indexOf('INACTIVE_OWNER_OR_USER') > -1){
+                                $scope.errorMessage =  'Your access is disabled. Contact your site administrator.';
+                            }
+                            else{
+                                $scope.errorMessage =  event.message;
+                            } 
+                            $scope.errorModalOpen();
+                        }
+                        isBtnDisable = false;
+                        $scope.$apply();
+                    },{escape: false}
+                );    
+            }
+            
+            $scope.resendEmail = function(){
+                $scope.isSuccess = false;
+                $scope.isForgot = true;
+            }
+            
+            $scope.returnBtn = function(){
+                window.location = "{!$page.plexus_Login}";
+            }
+            
+            $scope.errorModalOpen = function(){
+                $("#dialog" ).dialog({
+                    height: 140,
+                    modal: true,
+                    open: function (event, ui) {
+                     $('.ui-dialog').css('z-index',2147483647);
+                    },
+                 }); 
+            }
+            
+            $('#dialog').on('dialogclose', function(event){
+                 $scope.errorMessage = null;
+            });   
+        }]);
+         
+     </script>
+     <div ng-app="MyApp" class="ng-cloak">
+     <div ng-controller="myProfileController" data-ng-init="pageInit()">  
+        <div id="dialog" class="divCls" title="Error" ng-show="errorMessage != null">
+            {{errorMessage}}
+        </div>
+        <div  align="center" ng-show="isForgot == true && isSuccess == false">    
+            <div style="padding:30px;width:50%;">
+                <div align="center">
+                    <img src="{!URLFOR($Resource.Plexus_Logo)}" width="150px" height="100px"/>
+                </div>
+                
+            <form role="form" style="padding: 25px;height:300px;width: 400px;background-color:white;text-align: left;margin-top:10px;">
+                <div align="center">
+                    <h4>Forgot Your Password</h4>
+                </div><br/>
+                <label style="font-size: 14px;font-family: SFS, Arial, sans-serif; font-weight:normal; line-height:25px;">
+                To reset your password, enter your Salesforce username.
+                </label>
+                <div class="form-group" style="margin-top:15px;">
+                    <label for="np" style="font-size: 14px;font-family: SFS, Arial, sans-serif; font-weight:normal;">Username</label>
+                    <input type="text" ng-model="username" class="form-control" id="un"/>
+                </div>
+                <input type="button" float="left" ng-click="returnBtn()" ng-disabled="" value = "Cancel" class="btn" style="width:48%;height:30px;margin-top:10px;"></input>
+                <input type="button" float="right" ng-click="continueBtn()" ng-disabled="username == null || username == ''" value = "Continue" class="btn" style="width:48%;height:30px;margin-top:10px;"></input>
+            </form>
+            </div>
+        </div>
+        
+        <div  align="center" ng-show="isSuccess == true && isForgot == false">    
+            <div style="padding:30px;width:50%;">
+                <div align="center">
+                    <img src="{!URLFOR($Resource.Plexus_Logo)}" width="150px" height="100px"/>
+                </div>
+                
+            <form role="form" style="padding: 25px;height:300px;width: 400px;background-color:white;text-align: left;margin-top:10px;">
+                <div align="center">
+                    <h4>Check Your Email</h4>
+                </div><br/>
+                <label style="font-size: 14px;font-family: SFS, Arial, sans-serif; font-weight:normal; line-height:25px;">
+                We’ve sent you an email with a link to finish resetting your password.
+                </label>
+                <label style="margin-top:5px;font-size: 14px;font-family: SFS, Arial, sans-serif; font-weight:normal; line-height:25px;">
+                Can’t find the email? Try checking your spam folder.<br/>
+                </label>
+                <label style="margin-top:5px;font-size: 14px;font-family: SFS, Arial, sans-serif; font-weight:normal; line-height:25px;">
+                If you still can’t log in, have us <a href="" ng-click="resendEmail()" target="_blank" style="color: #337ab7;"><u>resend the email</u></a>&nbsp; or contact your Study Coordinator.
+                </label>
+                <input type="button" ng-click="returnBtn()" ng-disabled="" value = "Return to Login" class="btn" style="width:100%;height:30px;margin-top:13px;"></input>
+            </form>
+            </div>
+        </div>
+     </div>
+     </div>
+</apex:page> -->
+</apex:page>

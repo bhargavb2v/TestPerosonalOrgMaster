@@ -1,0 +1,208 @@
+<apex:page standardStylesheets="true" sidebar="false" showHeader="false"  id="page" controller="TFSLoginController">
+ 
+     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+     <style>
+     html{
+            min-height    :100%;
+            background    : #efefef; /* For browsers that do not support gradients */
+            background    : -webkit-linear-gradient(#efefef,  #63bdda); /* For Safari 5.1 to 6.0 */
+            background    : -o-linear-gradient(#efefef,  #63bdda); /* For Opera 11.1 to 12.0 */
+            background    : -moz-linear-gradient(#efefef,  #63bdda); /* For Firefox 3.6 to 15 */
+            background    : linear-gradient(#efefef,  #63bdda); /* Standard syntax */
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+            background-repeat:no-repeat;
+         }
+         body{
+            background    : transparent !important;
+         }
+         .head-tag{
+             padding      : 0px 6em;
+             font-size    : 1.8em;
+             font-weight  : bold;
+         }
+         .data-section{
+             font-size    : 1.2em;
+         }
+         .sect{
+             padding      :10px 0;
+         }
+         .sect label{
+             font-weight : bold;
+             color       : #5E5E5E;
+         }
+         .sect input{
+            width        : 94%;
+            height       : 40px;
+            margin-top   : 10px;
+            border-radius: 5px;
+            border       : 1px solid #cccccc;
+            padding      : 0 10px;
+         }
+         .form-div{
+            border-radius: 20px;
+            width        : 25%;
+            margin       : 0 auto !important;
+            left         : 15px;
+            padding      : 25px;
+            border       : 2px solid #66a2b5;
+         }
+         .btn-login{
+            height       : 30px;
+            width        : 28%;
+            margin-right: 15px;
+            margin-top   : 20px !important;
+         }
+         .forgot-password{
+            position     : relative;
+            top          : 7px;
+            left         : 5px;
+            font-size    : 1em;
+            margin-left  : 14%;
+         }
+         .login-ul{
+             padding     : 0;
+             width       : 100%;
+             list-style-type: none;
+         }
+         .data-section-li{
+             border-left : 2px solid #66a2b5;
+             margin      : 0px;
+         }
+         .image-section-li{
+            text-align   : center;
+            margin-top   : 3%;
+         }
+         .login-div-button{
+             text-align:center;
+         }
+         p{
+            color        : #3b6877;
+            font-size    : 1.7em;
+            text-align   : center;
+            font-style   : italic;
+            margin-top   : 10%;
+            padding      : 0 10%;
+         }
+         .img-li{
+            text-align   : center;
+            margin       : 5%;
+         }
+         .img-li img{
+             margin-left : 15px;
+         }
+         .alert-red{
+            border       : 1px solid #b64646;
+            border-radius: 10px;
+            padding      : 10px;
+            position     : relative;
+            top          : 0px;
+            z-index      : 99;
+            background   : #ff6363;
+            font-size    : 1.2em;
+            color        : #ffffff;
+            font-weight  : bold;
+            text-align   :center
+         }
+         .x-style{
+            font-size: 9px;
+            position : absolute;
+            top      : 5%;
+            right    : 2%;
+            font-weight: normal;
+            border: 1px solid #ffffff;
+            padding: 0 2px 0 2px;
+            border-radius: 3px;
+            cursor: pointer;
+         }
+         
+     </style>
+     <script>
+         function fnLogin(){
+             location.href='phani_studies_page'
+         }
+         $(document).ready(function(){   
+             $(".x-style").click(function(){
+                 $('.alert-red').hide();
+             });
+             
+             if('{!errorMsg}' != null && '{!errorMsg}' != ''){
+                $('.alert-red').show();
+            }
+            else{
+                $('.alert-red').hide();
+            } 
+         });
+         
+     </script>
+     <div>
+        <apex:form id="frm" style="overflow:hidden;background-color: lightgray;">
+            <div>        
+                <img src="{!URLFOR($Resource.headercar)}" width="100%" height="170px"/>
+            </div>
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-div" style="width:100% !important;">
+                        <div style="display:none" class="alert-red">
+                             <apex:outputText id="errorText" value="{!errorMsg}" style="font-size: 12px;"/><span class="x-style">X</span>
+                        </div> 
+                        <div class="sect">
+                            <div><label>User Name</label></div>
+                            <div><apex:inputText value="{!username}"/>
+                            </div>
+                        </div>
+                        <div class="sect">
+                            <div><label>Password</label></div>
+                            <div><apex:inputSecret value="{!password}"/></div>
+                        </div>          
+                        <div class="login-div-button">
+                            <apex:commandButton action="{!login}" styleClass="btn-login" value="Login"/>
+                            <apex:commandLink action="{!forgotpassword}" value="Forgot Password"/> 
+                        </div> 
+                    </div>  
+                </div>
+                <div class="col-sm-8" style="font-size: 13px;">
+                    <div class="form-div" style="width:100% !important;">
+                    XYZ<br/><br/>
+                    ABC
+                    <br/><br/>
+                    ABCDEFGHIJLMNOPQRSTUVWXYZ
+                    <br/><br/>
+                    LMN
+                    <br/><br/>
+                    PQR
+                    </div>
+                </div>
+            </div>
+             <div class="row" style="font-size: 13px;">
+                <div class="col-sm-4">
+                    <div class="form-div" style="width:100% !important;">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                Mobile
+                            </div>
+                            <div class="col-sm-6">
+                                +91-999999999
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                Landline
+                            </div>
+                            <div class="col-sm-6">
+                                +91-999999999
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-8">
+                    <img src="{!URLFOR($Resource.headercar)}" width="100%" height="130px"/>
+                </div>
+             </div>                
+        </apex:form>         
+    </div>
+</apex:page>

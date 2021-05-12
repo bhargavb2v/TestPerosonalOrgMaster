@@ -1,0 +1,20 @@
+<aura:component implements="flexipage:availableForAllPageTypes,force:lightningQuickAction,force:hasRecordId,lightning:isUrlAddressable" 
+                access="global" 
+                controller="LWCCreateContactController">
+    
+    <aura:attribute name="recordId" type="String" />
+    <aura:attribute name="conObj" type="Object" />
+    <aura:attribute name="pageReference" type="Object"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    
+    <aura:attribute name="messageFromEvent" type="String"/>
+    <aura:attribute name="conId" type="String"/>
+    <aura:attribute name="numEvents" type="Integer" default="0"/>
+    
+    <aura:handler event="c:ApplicationEventDemo" action="{!c.handleApplicationEvent}"/>
+    <div class="slds-card">
+        {!v.conObj.Name} - {!v.conId}
+        <p>{!v.messageFromEvent}</p>
+        <p>Number of events: {!v.numEvents}</p>
+    </div>
+</aura:component>

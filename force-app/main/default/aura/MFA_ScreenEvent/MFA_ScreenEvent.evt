@@ -1,0 +1,6 @@
+<aura:event type="COMPONENT">
+    <aura:attribute name="IdentitySelectionScreen" type="Boolean"/>
+    <aura:attribute name="IdentityConfirmationScreen" type="Boolean"/>
+    <aura:attribute name="selectedIdentity" type="String"/>
+    <aura:attribute name="qrWrapper" type="Object"/>
+</aura:event>

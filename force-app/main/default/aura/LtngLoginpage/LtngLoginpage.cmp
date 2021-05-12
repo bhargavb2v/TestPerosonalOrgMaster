@@ -1,0 +1,4 @@
+<aura:component controller="ltngLoginpageController" 
+				implements="forceCommunity:availableForAllPageTypes" access="global" >
+   
+</aura:component>

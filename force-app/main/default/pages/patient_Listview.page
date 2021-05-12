@@ -1,0 +1,595 @@
+<apex:page >
+<!-- <apex:page controller="Plexus_PatientListViewController"  tabStyle="Plexus_Patients__tab" action="{!init}" showHeader="{!IF(isAdmin == 'Yes',true,false)}" sidebar="false" standardstylesheets="true" >
+    <apex:messages />
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css"/>
+        <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+        
+         <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css"/>
+      <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+
+        <style>
+            .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+                padding: 8px;
+                line-height: 1.42857143;
+                vertical-align: top;
+                border-top: 1px solid #ddd;
+                font-size: 12px;
+                text-align: center;
+            }
+            body{background-color: white; }
+            
+            button.ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-icon-only.ui-dialog-titlebar-close:focus {
+                outline: 0 !important;
+            }
+
+            th{color: white;white-space: normal;border-color: white;    border-bottom: 0px solid #ddd !important;}
+            thead{background-color: grey;}
+            table{border-color: darkgray;}
+
+            .glyphicon.glyphicon-arrow-right{font-size: large;}
+            
+            .ng-modal-overlay {
+              /* A dark translucent div that covers the whole screen */
+              position:fixed;
+              z-index:9999;
+              top:0;
+              left:0;
+              width:100%;
+              height:100%;
+              background-color:#000000;
+              opacity: 0.8;
+            }
+            .ng-modal-dialog {
+              /* A centered div above the overlay with a box shadow. */
+              z-index:10000;
+              position: absolute;
+              width: 50%; /* Default */
+            
+              /* Center the dialog */
+              top:200px;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              -webkit-transform: translate(-50%, -50%);
+              -moz-transform: translate(-50%, -50%);
+            
+              background-color: #fff;
+              box-shadow: 4px 4px 80px #000;
+            }
+            
+            .ng-modal-dialog-content {
+              padding:10px;
+              text-align: left;
+            }
+            .ng-modal-close {
+              position: absolute;
+              top: 3px;
+              right: 5px;
+              padding: 5px;
+              cursor: pointer;
+              font-size: 120%;
+              display: inline-block;
+              font-weight: bold;
+              font-family: 'arial', 'sans-serif';
+            }
+            
+            .bar {
+              position: absolute;
+              margin: auto;
+              top: 0; bottom: 0; left: 0; right: 0;
+              width: 200px;
+              height: 30px;
+              overflow: hidden;
+              background-size:100px 100px;
+              background-image: linear-gradient(-45deg,
+                 #33c9ff 25%, #00b2f2 25%, 
+                 #00b2f2 50%, #33c9ff 50%,
+                 #33c9ff 75%, #00b2f2 75%);
+              animation: anim 1s linear infinite;
+            }
+            
+            .bar p {
+              width: 100px;
+              margin: 6px auto;
+              text-align: center;
+              color: white;
+            }
+        </style>  
+        
+        <script>
+        $(document).ready(function(){
+             setTimeout(function(){
+                localStorage.setItem("activeMenu", 0);
+                $(".navigation-bar li a").removeClass('active');
+                $($(".navigation-bar li a")[localStorage.getItem("activeMenu")]).addClass('active');
+             },0)            
+        })
+         
+        Visualforce.remoting.timeout = 120000; // Set timeout at page level
+        var app = angular.module('MyApp', []);
+        
+        app.filter('pagination', function(){
+             return function(input, start){
+                 start = +start;
+                 return input.slice(start);
+             };
+        });
+        
+        app.directive('modalDialog', function() {
+          return {
+            restrict: 'E',
+            scope: {
+              show: '='
+            },
+            replace: true, // Replace with the template below
+            transclude: true, // we want to insert custom content inside the directive
+            link: function(scope, element, attrs) {
+              scope.dialogStyle = {};
+              if(attrs.width)
+                scope.dialogStyle.width = attrs.width;
+              if(attrs.height)
+                scope.dialogStyle.height = attrs.height;
+              scope.hideModal = function() {
+                scope.show = false;
+              };
+            },
+           template: function(tElement, tAttrs) {
+                if(tAttrs.type == 'Loading'){
+                    return "<div class='ng-modal' ng-show='show'><div class='ng-modal-overlay'></div><div class='ng-modal-dialog' ng-style='dialogStyle'><div ng-transclude></div></div></div>";
+                }
+                else if(type='docsListWindow'){
+                    return "<div class='ng-modal' ng-show='show'><div class='ng-modal-overlay''></div><div class='ng-modal-dialog' ng-style='dialogStyle'><div class='ng-modal-close' ng-click='hideModal()'>X</div><div class='ng-modal-dialog-content' ng-transclude></div></div></div>";
+                }
+             } 
+          };
+        });
+        
+        app.controller('patientListViewController' ,['$scope',function($scope){
+            $scope.patientList = []; 
+            $scope.filteredItems = [];
+            $scope.sMap;
+            
+            $scope.pageSizeValues = [10,25,50,100];
+            $scope.pageSize = 10;
+            $scope.curPage = 0;
+            $scope.dCurPage = 0;
+            $scope.docList;
+            $scope.patientName;
+            
+            $scope.sendInviteList = []
+
+            $scope.pageInit = function() {   
+                $scope.modalShown = true;
+                Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.Plexus_PatientListViewController.getInitInformation}','{!studySFId}','{!siteSFId}',
+                   function(result, event) {
+                        $scope.patientList = result;
+
+                        $scope.filteredItems = $scope.patientList;
+                        $scope.setDefault($scope.patientList);
+                        $scope.sort('createddate');
+                        $scope.modalShown = false;
+                        $scope.$apply(); 
+                       
+                  },{escape: false}
+               );    
+            }
+            
+            $scope.setDefault = function(sList){
+                $scope.curPage = 0;
+                
+                $scope.firstRec = sList.length > 0 ? 1 : 0;
+                $scope.lastRec = sList.length > $scope.pageSize ? $scope.pageSize : sList.length > 0 ?sList.length :0;
+                $scope.totalRec = sList.length;
+                
+                if ($scope.search == '' || $scope.search == null) {
+                    $scope.total = sList.length;
+                    $scope.filteredItems = sList;
+                }
+            }
+            
+            $scope.search = function(item){
+                if($scope.searchText == undefined){
+                    return true;
+                }
+                else{
+                    if(item.siteId.toLowerCase().indexOf($scope.searchText.toLowerCase()) > -1 
+                                || item.patientId.toLowerCase().indexOf($scope.searchText.toLowerCase()) > -1 
+                                || item.firstName.toLowerCase().indexOf($scope.searchText.toLowerCase()) > -1 
+                                || item.lastName.toLowerCase().indexOf($scope.searchText.toLowerCase()) > -1 
+                                || item.dob.indexOf($scope.searchText.toLowerCase()) > -1 
+                                || item.email.toLowerCase().indexOf($scope.searchText.toLowerCase()) > -1 
+                                || item.noOfDocs.toString().indexOf($scope.searchText.toLowerCase()) > -1 
+                                || item.regStatus.toLowerCase().indexOf($scope.searchText.toLowerCase()) > -1 
+                                || item.consentStatus.toLowerCase().indexOf($scope.searchText.toLowerCase()) > -1){
+                        return true;
+                    }
+                }
+                
+                return false;
+            }
+            
+            $scope.sort = function(keyname){
+                $scope.sortKey = keyname;   //set the sortKey to the param passed
+                $scope.reverse = !$scope.reverse; //if true make it false and vice versa
+            };
+            
+            $scope.numberOfPages = function() {
+                return Math.ceil($scope.filteredItems.length / $scope.pageSize);
+            };
+            $scope.dNumberOfPages = function() {
+                return Math.ceil($scope.docList.length / 5);
+            };
+            
+            $scope.searchChange = function(){
+                $scope.setDefault($scope.filteredItems);
+            };
+            
+            $scope.nextClick = function(){
+                $scope.curPage = $scope.curPage+1;
+                $scope.firstRec = $scope.filteredItems.length > 0 ? (($scope.curPage * $scope.pageSize) + 1) : 0;
+                $scope.lastRec = $scope.filteredItems.length > (($scope.curPage+1) * $scope.pageSize) ? (($scope.curPage+1) * $scope.pageSize) : $scope.filteredItems.length;
+                $scope.totalRec = $scope.filteredItems.length;
+            }
+            
+            $scope.PreviousClick = function(){
+                $scope.curPage = $scope.curPage-1;
+                $scope.firstRec = $scope.filteredItems.length > 0 ? (($scope.curPage * $scope.pageSize) + 1) : 0;
+                $scope.lastRec = $scope.filteredItems.length > (($scope.curPage+1) * $scope.pageSize) ? (($scope.curPage+1) * $scope.pageSize) : $scope.filteredItems.length;
+                $scope.totalRec = $scope.filteredItems.length;
+            }
+            
+            $scope.pazeSizeChange = function(){
+                $scope.setDefault($scope.filteredItems); 
+            }
+            
+            $scope.docViewClicked = function(patName,docsList){
+                $scope.dCurPage = 0;
+                if(docsList == null || docsList.length == 0){
+                    $scope.errorMessage = 'There is no document associated with the patient';
+                    $scope.errorModalOpen();
+                }
+                else{
+                    $scope.docList = docsList;
+                    $scope.patientName = patName;
+                    $scope.docsListWindow = true;
+                    $scope.sort('Document_Type__c');
+                } 
+            }
+            
+            $scope.dPrevClick = function(){
+                 $scope.dCurPage = $scope.dCurPage-1;
+            }
+            $scope.dNextClick = function(){
+                 $scope.dCurPage = $scope.dCurPage+1;
+            }
+            
+            $scope.checkboxSelectClick = function(rec){
+                if(rec.isChecked == 'Yes' && $scope.sendInviteList.length == 10){ 
+                    $scope.errorMessage = "You can invite 10 members only at a time.";
+                    $scope.errorModalOpen();
+                    rec.isChecked = 'No';
+                    return;        
+                }
+                if(rec.isChecked == 'Yes'){
+                    $scope.sendInviteList.push(rec.patientSFId);  
+                } 
+                else if(rec.isChecked == 'No'){
+                    var index = $scope.sendInviteList.indexOf(rec.patientSFId);
+                    if(index > -1){
+                        $scope.sendInviteList.splice(index, 1);
+                    }
+                } 
+            }
+            
+            var inviteButtonStatus = false;
+            $scope.sendInviteButtonClicked = function(){
+                if(inviteButtonStatus == true){
+                    return; 
+                }
+                if($scope.sendInviteList.length > 10){
+                    $scope.errorMessage = "You can invite only 10 members at a time.";
+                    $scope.errorModalOpen();
+                    return;     
+                }
+                if($scope.sendInviteList.length > 0){
+                   $scope.modalShown = true;
+                   inviteButtonStatus = true;
+                   Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.Plexus_PatientListViewController.sendInvitationToPatient}',$scope.sendInviteList,
+                       function(result, event) { 
+                           if(event.status) {
+                               $scope.modalShown = false;  
+                               $scope.invitedStatus = 'An invitation has been sent successfully to the selected patient(s).';    
+                           }
+                           else{
+                                if(event.message.indexOf('DUPLICATE_USERNAME') > -1){
+                                   $scope.errorMessage = "The username already exists in this or another Salesforce organization. Usernames must be unique across all Salesforce organizations.";
+                                   $scope.errorModalOpen();
+                               }
+                               else if(event.message.indexOf('DUPLICATE_VALUE') > -1){
+                                   $scope.errorMessage = "Email already exists. Please enter a new email to continue.";
+                                   $scope.errorModalOpen();
+                               }
+                               else{
+                                    $scope.errorMessage = event.message;
+                                    $scope.errorModalOpen(); 
+                               }
+                                $scope.modalShown = false;
+                                inviteButtonStatus = false;    
+                           } 
+                           $scope.$apply();    
+                       }  
+                   ); 
+                }
+                else{
+                    $scope.errorMessage = "Please select at least one patient to send invite.";
+                    $scope.errorModalOpen();
+                    return;     
+                }  
+            }
+            
+            $scope.backBtnClicked = function(){
+                window.location.href = "{!$page.Plexus_PatientListView}?sId={!studySFId}";
+            }
+            
+            $scope.backClick = function(){
+                window.location.href = "{!$page.Plexus_PatientAdminHome}";
+            }
+            
+            $scope.errorModalOpen = function(){
+                $("#dialog" ).dialog({
+                    height: 140,
+                    modal: true,
+                    open: function (event, ui) {
+                     $('.ui-dialog').css('z-index',2147483647);
+                    },
+                 }); 
+            }
+            
+            $('#dialog').on('dialogclose', function(event){
+                 $scope.errorMessage = null;
+                 $("#searchtext").focus();
+            });
+            
+            $scope.addNewPatientBtnClicked = function(){
+                window.location.href = '{!$Page.Plexus_PatientSearch}?sId={!studySFId}';
+            }
+        }]);
+    </script>
+    
+    <div ng-app="MyApp" class="ng-cloak">
+    <div ng-controller="patientListViewController" data-ng-init="pageInit()">
+        <div style="{!IF(isAdmin == 'Yes','display:none','display:block')}">
+            <c:Plexus_Header > </c:Plexus_Header>
+        </div>
+        <div ng-show="invitedStatus != null && invitedStatus != '' " >
+            <div class="landing-container" style="height:250px;background-color:white;" align="center">
+                <div style="padding:100px" align="center">
+                        <form class="form-inline">
+                            <div class="form-group">
+                                <label style="padding-right:20px">{{invitedStatus}}</label> 
+                            </div>
+                            <div style="padding-top:20px;padding-left:50px;" align="right">
+                                <input type="button" class="btn" value="Back" ng-click="backBtnClicked()"></input>
+                            </div>
+                        </form>
+                </div>
+            </div>
+        </div>
+        <div ng-show="invitedStatus == null || invitedStatus == ''">
+        <div class="{!IF(isAdmin == 'Yes','','landing-container')}" style="padding-left: 25px;padding-right: 25px;padding-bottom: 25px;">
+        
+            <div id="dialog" class="divCls" title="Error" ng-show="errorMessage != null">
+                {{errorMessage}}
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <h2>My Patients</h2>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="col-md-6">
+                    <span class="pull-right" >
+                        <form class="form-inline" style="{!IF(isAdmin == 'Yes','display:none','display:block')}">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-success" ng-click="addNewPatientBtnClicked()">
+                            Add New Patient
+                            </button>
+                        </div>
+                        <button type="button" class="btn btn-success" ng-click="sendInviteButtonClicked()">
+                            Send Invite
+                        </button>
+                        </form>
+                        <form class="form-inline" style="{!IF(isAdmin == 'Yes','display:block','display:none')};padding-right:25px">
+                            <input type="button" class="btn" value="Back" ng-click="backClick()"/>
+                        </form>
+                    </span>
+                </div>
+            </div> <br/>
+            <div class="row">
+                <div class="col-md-6">
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <label >Show</label>
+                            <select ng-model="pageSize" value ="{{o}}" class="form-control" ng-options="i for i in pageSizeValues" ng-change="pazeSizeChange()"></select>
+                            <label >entries</label>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="col-md-6">
+                    <span class="pull-right">
+                        <form class="form-inline">
+                        <div class="form-group">
+                            <label >Search</label>
+                            <input type="text" id="searchtext" ng-model="searchText" class="form-control" placeholder="Search" ng-keyup="searchChange();"/>
+                        </div>
+                        </form>
+                    </span>
+                </div>
+            </div>
+    
+            <table class="table" border="1" style="margin-top:10px;">
+                <thead class="thead-inverse">
+                    <tr>
+                        <th width="4%" align="center" style="vertical-align: middle;{!IF(isAdmin == 'Yes','display:none;',null)}">Select</th>
+                        <th width="10%" ng-click="sort('siteId')" style="vertical-align: middle;">Site ID
+                        <span class="glyphicon sort-icon" ng-show="sortKey=='siteId'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                        </th>
+                        <th width="10%" ng-click="sort('patientId')" style="vertical-align: middle;">MRN
+                        <span class="glyphicon sort-icon" ng-show="sortKey=='patientId'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                        </th>
+                        <th width="9%" ng-click="sort('pId')" style="vertical-align: middle;">Patient ID
+                        <span class="glyphicon sort-icon" ng-show="sortKey=='pId'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                        </th>
+                        <th width="18%" ng-click="sort('firstName')" style="vertical-align: middle;">Patient Name
+                        <span class="glyphicon sort-icon" ng-show="sortKey=='firstName'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                        </th>
+                        <th width="6%" ng-click="sort('dob')" style="vertical-align: middle;">DOB
+                        <span class="glyphicon sort-icon" ng-show="sortKey=='dob'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                        </th>
+                        <th width="18%" ng-click="sort('email')" style="vertical-align: middle;">Email
+                        <span class="glyphicon sort-icon" ng-show="sortKey=='email'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                        </th>
+                        <th width="6%" ng-click="sort('noOfDocs')" style="vertical-align: middle;">Documents
+                        <span class="glyphicon sort-icon" ng-show="sortKey=='noOfDocs'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                        </th>
+                        <th width="7%" ng-click="sort('regStatus')" style="vertical-align: middle;">Registration Status
+                        <span class="glyphicon sort-icon" ng-show="sortKey=='regStatus'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                        </th>  
+                        <th width="7%" ng-click="sort('consentStatus')" style="vertical-align: middle;">Consent Status
+                        <span class="glyphicon sort-icon" ng-show="sortKey=='consentStatus'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                        </th> 
+                        <th width="5%" style="vertical-align: middle;">Patient Details</th>
+                        <th width="5%" style="vertical-align: middle;">eCRF Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="rec in (filteredItems = (patientList|orderBy:sortKey:reverse|filter:search) |pagination: curPage * pageSize | limitTo:pageSize) ">
+                        <td width="4%" align="center" style="vertical-align: middle;{!IF(isAdmin == 'Yes','display:none;',null)}">
+                        <input ng-disabled="!((rec.regStatus == 'New' && rec.consentStatus == 'Consented') || (rec.regStatus == 'De-Registered' && rec.consentStatus == 'Consented'))" type="checkbox" name="{{$index}}" ng-model="rec.isChecked" ng-true-value="'Yes'" ng-false-value="'No'" ng-click="checkboxSelectClick(rec);"/>
+                        </td>
+                        <td width="10%" style="vertical-align: middle;">{{rec.siteId}}</td>
+                        <td width="10%" style="vertical-align: middle;">{{rec.patientId}}</td>
+                        <td width="9%" style="vertical-align: middle;">{{rec.pId}}</td>
+                        <td width="18%" style="vertical-align: middle;">{{rec.firstName}} {{rec.lastName}}</td>
+                        <td width="6%" style="vertical-align: middle;">{{rec.dob | date:'MM/dd/yyyy'}}</td>
+                        <td width="18%" style="vertical-align: middle;">{{rec.email}}</td>
+                        <td width="6%" style="vertical-align: middle;">
+                        <a href="#" ng-click="docViewClicked(rec.fullName,rec.docList)">{{rec.noOfDocs}}</a>
+                        </td>
+                        <td width="7%" style="vertical-align: middle;">{{rec.regStatus}}</td>
+                        <td width="7%" style="vertical-align: middle;">{{rec.consentStatus}}</td>
+                        <td width="5%" >
+                        <a ng-href="{!$Page.Plexus_PatientAddEdit}?pId={{rec.patientSFId}}&sId={{rec.studySFId}}&mode=View"><apex:image url="{!$Resource.pdvLogo}" width="40" height="30" title="Patient Details"/></a>
+                        </td>
+                        <td width="5%" >
+                        <a ng-href="{!$Page.Plexus_PatientPage}?id={{rec.patientSFId}}&sId={!studySFId}&pssId={{rec.psspSFId}}&mode=View"><apex:image url="{!$Resource.pdvLogo}" width="40" height="30" title="eCRF Details"/></a>
+                        </td>
+                    </tr>
+                    <tr height="30px" ng-show="searchText != null && searchText != '' && filteredItems != null && filteredItems.length == 0">
+                        <td colspan="12" align="center" style="vertical-align:middle"> 
+                        No matching records found
+                        </td>
+                    </tr>
+                     <tr height="30px" ng-show="(searchText == null || searchText == '') && filteredItems != null && filteredItems.length == 0">
+                        <td colspan="12" align="center" style="vertical-align:middle"> 
+                        No data available in table
+                        </td>
+                    </tr>
+    
+                </tbody>
+            </table> 
+            <div class="row" ng-show="filteredItems != null && filteredItems.length > 0">
+                <div class="col-md-6">
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <label>Showing {{firstRec}} to {{lastRec}} of {{totalRec}} entries</label>
+                            <label ng-show="searchText != null && searchText != ''">(filtered from {{total}} total entries)</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <span class="pull-right" ng-show="filteredItems != null && filteredItems.length > pageSize">
+                        <form class="form-inline">
+                        <div class="form-group">
+    
+                      <button type="button" class="btn btn-primary" ng-disabled="curPage == 0" ng-click="PreviousClick()">PREV</button>
+                       <span>Page {{curPage + 1}} of {{ numberOfPages() }}</span>
+    
+                       <button type="button" class="btn btn-primary" ng-disabled="curPage >= filteredItems.length/pageSize - 1" ng-click="nextClick()">NEXT</button>
+    
+                        </div>
+                        </form>
+                    </span>
+                </div>
+            </div>
+            <div>
+                <modal-dialog show='modalShown' type='Loading'>
+                    <div class="bar">
+                    <p>loading</p>
+                    </div>
+                </modal-dialog> 
+            </div>
+            <div>
+                <modal-dialog show='docsListWindow' width='50%' height='350px' type='docsListWindow' style="overflow:auto">
+                <apex:outputPanel layout="block" style="max-height:350px;overflow:auto;width:100%;" >
+                <apex:form >
+                <div style="width:80% !important; margin-left:auto;margin-right:auto; ">
+                    <h3>{{patientName}}</h3><br/><br/>
+                    <table class="table .table-bordered" border="1" >
+                        <thead class="thead-inverse">
+                        <tr>
+                            <th ng-click="sort('Document_Type__c')">Document Type
+                                <span class="glyphicon sort-icon" ng-show="sortKey=='Document_Type__c'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                </th>
+                                <th ng-click="sort('File_Name__c')">Document Name
+                                <span class="glyphicon sort-icon" ng-show="sortKey=='File_Name__c'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="rec in docList|orderBy:sortKey:reverse|pagination: (dCurPage * 5)| limitTo:5 ">
+                                <td>{{rec.Document_Type__c}}</td>
+                                <td>{{rec.File_Name__c}}</td>
+                            </tr>
+                        </tbody>
+                     </table>
+                     
+                     <div class="row" ng-show="docList.length != null && docList.length > 5">
+                        <div class="col-md-6">
+                        </div>
+                        <div class="col-md-6">
+                            <span class="pull-right">
+                                <form class="form-inline">
+                                <div class="form-group">
+            
+                              <button type="button" class="btn btn-primary" ng-disabled="dCurPage == 0" ng-click="dPrevClick()">PREV</button>
+                               <span>Page {{dCurPage + 1}} of {{ dNumberOfPages() }}</span>
+            
+                               <button type="button" class="btn btn-primary" ng-disabled="dCurPage >= docList.length/5 - 1" ng-click="dNextClick()">NEXT</button>
+            
+                                </div>
+                                </form>
+                            </span>
+                        </div>
+                    </div>
+                    </div>
+                </apex:form>
+                </apex:outputPanel>
+                </modal-dialog>
+            </div>  
+        </div>
+        </div>
+         <div style="{!IF(isAdmin == 'Yes','display:none','display:block')}">
+            <c:Plexus_Footer > </c:Plexus_Footer>
+        </div> 
+    </div>
+    </div>
+</apex:page>-->
+</apex:page>

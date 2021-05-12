@@ -1,0 +1,30 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global">
+     <!-- Include Static Resource-->
+    <ltng:require styles="/resource/bootstrap/bootstrap-4.0.0-alpha.6-dist/css/bootstrap.min.css" 
+                  scripts="/resource/bootstrap/bootstrap-4.0.0-alpha.6-dist/js/jquery.js,/resource/bootstrap/bootstrap-4.0.0-alpha.6-dist/js/bootstrap.min.js"/>
+	 
+<div style="background-color:white; height:100px;color: black;font-weight: 600;padding:10px;">
+    <h3>CONTACT US</h3>
+    <div class="row">
+    	<div class="col-sm-2"><hr style="height: 3px;background-color: skyblue;border: 0px;"></hr> </div>
+        <div class="col-sm-10"></div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">CONNECT HELP</div>
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-12">888- 888 888-</div>
+                <div class="col-sm-12">Option 1, then option 3</div>
+            </div>
+        </div>
+    </div>
+	<div class="row">
+        <div class="col-sm-6">SALES/CREDIT/FUNDING</div>
+        <div class="col-sm-6">888- 888 888-</div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">FLOORPLAN</div>
+        <div class="col-sm-6">888- 888 888-</div>
+    </div>
+</div>
+</aura:component>

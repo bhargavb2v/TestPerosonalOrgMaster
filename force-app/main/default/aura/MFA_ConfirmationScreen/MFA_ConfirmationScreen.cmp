@@ -1,0 +1,90 @@
+<aura:component implements="flexipage:availableForAllPageTypes" 
+                controller="MFA_LoginFlowController" 
+                access="global">
+    <aura:attribute name="MFASettings" type="Object" access="global"/>
+    <aura:attribute name="userIdentity" type="Object" access="global"/> 
+    <aura:attribute name="selectedIdentity" type="String" access="global"/>
+    <aura:attribute name="qrWrapper" type="Object" access="global"/>
+    
+    <aura:attribute name="regToken" type="String" access="global"/>
+    <aura:attribute name="token" type="String" access="global"/>
+    <aura:attribute name="securityCode" type="String" access="global"/>
+    <aura:attribute name="emailHeaderMessage" type="String" access="global"/>
+    <aura:attribute name="isNewCode" type="boolean" default="false"/>
+    <aura:attribute name="errorMessage" type="String" access="global"/>
+    <aura:attribute name="errorFlag" type="boolean" access="global" default="false"/>
+    
+    <aura:attribute name="spinner" type="boolean" default="false"/>
+    
+    <aura:registerEvent name="MFAScreenEvent" type="c:MFA_ScreenEvent" />
+    <aura:registerEvent name="MFA_AppEvent" type="c:MFA_AppEvent" />
+    <aura:handler name="init" value="{!this}" action="{!c.init}" />
+    
+    <aura:if isTrue="{!v.selectedIdentity == 'Mobile'}">
+        <aura:if isTrue="{!v.userIdentity.hasRegisteredToken == false}">
+            <div>
+                <b>Add a Time-based Token</b><br/>
+                {!v.MFASettings.QR_Code_Message__c}
+            </div>
+            <div align="center">
+                <div>
+                    <img src="{!v.qrWrapper.qr_URL}"/>
+                </div>
+            </div>
+            <div style="padding-top:20px;">
+                <lightning:input type="text" name="regToken" label="Token" aura:id="regToken" value="{!v.regToken}"/> 
+            </div>
+        </aura:if>
+        <aura:if isTrue="{!v.userIdentity.hasRegisteredToken == true}">
+            <div>
+                <b>Enter Time-based Token</b><br/>
+                {!v.MFASettings.Mobile_Confirmation_Screen_Message__c}
+            </div>
+            <div style="padding-top:20px;">
+                <lightning:input type="text" name="token" label="Token" aura:id="token" value="{!v.token}"/> 
+            </div>
+            <div style="padding-top:20px;">
+                <b>Having Trouble?</b><br/>
+                {!v.MFASettings.Mobile_Confirmation_Screen_Message__c}
+            </div>
+        </aura:if>
+    </aura:if>
+    <aura:if isTrue="{!v.selectedIdentity == 'Email'}">
+        <div style="{! v.isNewCode == true ? 'color:green;' : 'color:black;'}">
+            {!v.emailHeaderMessage}
+        </div>
+        <div style="padding-top:20px;">
+            <lightning:input type="text" name="securityCode" label="Verification Code" aura:id="securityCode" value="{!v.securityCode}"/> 
+        </div>
+        <aura:if isTrue="{! v.errorFlag}"> 
+            <div style="color:red">
+                {!v.MFASettings.Invalid_Code_Error_Message__c}
+            </div>
+        </aura:if>
+        <div style="padding-top:20px;">
+            <b>Didn't receive the email?</b><br/>
+            {!v.MFASettings.Email_Confirmation_Screen_SPAM_Message__c}
+        </div>
+        <div style="padding-top:10px;">
+            <a href="" onclick="{!c.newVerificationCodeClick}">
+                Send me a new Verification Code
+            </a>
+        </div>    
+    </aura:if>
+    
+    
+    <div align="right" style="padding-top:10px;">
+        <lightning:button label="Back" class="btn btn-primary btnCls" onclick="{!c.backButtonClick}"></lightning:button>
+        <lightning:button label="Submit" class="btn btn-primary btnCls" onclick="{!c.submitButtonClick}"></lightning:button>
+    </div>
+    
+    <aura:if isTrue="{!v.spinner}">
+        <div aura:id="spinnerId" class="slds-spinner_container">
+            <div class="slds-spinner slds-spinner--large slds-is-relative" role="alert">
+                <span class="slds-assistive-text">Loading</span>
+                <div class="slds-spinner__dot-a"></div>
+                <div class="slds-spinner__dot-b"></div>
+            </div>
+        </div>
+    </aura:if>  
+</aura:component>

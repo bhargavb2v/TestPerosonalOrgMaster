@@ -1,0 +1,1149 @@
+<apex:page >
+  <!-- <apex:page Controller="Plexus_ColonoscopySigmoControllerPhase2"  tabStyle="Plexus_Patients__tab" action="{!init}" showHeader="{!IF(isAdmin == 'Yes',true,false)}" sidebar="false" standardStylesheets="true" docType="html-5.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+    
+     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css"/>
+        <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+        
+    
+    <style>
+    label {
+       
+        font-weight: normal;
+    }
+        .bPageBlock {
+             border-top: 3px solid #1797c0 !important;
+        }
+        th {
+            background-color: #00BFFF;
+            color: white;
+        }
+        
+        .radios > span{
+            white-space: nowrap;
+            display: inline-block;
+        }
+        .form-style-2-heading{
+            font-weight: bold;
+            font-style: italic;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 5px;
+            margin-top: 15px;
+            font-size: 15px;
+            padding-bottom: 3px;
+        }
+    
+        .ng-modal-overlay {
+          /* A dark translucent div that covers the whole screen */
+          position:fixed;
+          z-index:9999;
+          top:0;
+          left:0;
+          width:100%;
+          height:100%;
+          background-color:#000000;
+          opacity: 0.8;
+        }
+    
+        .ng-modal-dialog {
+          /* A centered div above the overlay with a box shadow. */
+          z-index:10000;
+          position: absolute;
+          width: 50%; /* Default */
+        
+          /* Center the dialog */
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          -webkit-transform: translate(-50%, -50%);
+          -moz-transform: translate(-50%, -50%);
+        
+          background-color: #fff;
+          box-shadow: 4px 4px 80px #000;
+        }
+    
+    
+        @keyframes anim {
+            0% { background-position: 0 0; }
+            100% { background-position: 50px 50px; }
+        }    
+
+        .bar {
+          position: absolute;
+          margin: auto;
+          top: 0; bottom: 0; left: 0; right: 0;
+          width: 200px;
+          height: 30px;
+          overflow: hidden;
+          background-size:100px 100px;
+          background-image: linear-gradient(-45deg,
+             #33c9ff 25%, #00b2f2 25%, 
+             #00b2f2 50%, #33c9ff 50%,
+             #33c9ff 75%, #00b2f2 75%);
+          animation: anim 1s linear infinite;
+        }
+        
+        .bar p {
+          width: 100px;
+          margin: 6px auto;
+          text-align: center;
+          color: white;
+        }
+        
+        .req {font-size: 150%; color:red} 
+        
+        body {
+          background: #3568AD;
+        }
+        #wrapper {
+          font: 20px Calibri;
+          width: 100px;
+          margin: 0 auto;
+        }
+        
+        #evntDate { display: none; }
+        
+        .pageBlockSection {
+            background-color: #AED6F1;
+            padding-left: 3px;
+            /* vertical-align: middle !important; */
+            font-weight: bold;
+            color: white;
+            /* align-content: center; */
+            padding:6px;
+        }
+
+    </style>
+    <script>
+        function isNumber(evt) {
+            evt = (evt) ? evt : window.event;
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                return false;
+            }
+            return true;
+        }
+        function setFocusOnLoad() {}
+        $(document).ready(function() {
+            $("#evntDate").datepicker();
+            
+             setTimeout(function(){
+                localStorage.setItem("activeMenu", 0);
+                $(".navigation-bar li a").removeClass('active');
+                $($(".navigation-bar li a")[localStorage.getItem("activeMenu")]).addClass('active');
+             },0)            
+         });
+        
+
+        
+        Visualforce.remoting.timeout = 120000; // Set timeout at page level
+        var app = angular.module('MyApp', []);
+        
+        app.directive('modalDialog', function() {
+          return {
+            restrict: 'E',
+            scope: {
+              show: '='
+            },
+            replace: true, // Replace with the template below
+            transclude: true, // we want to insert custom content inside the directive
+            link: function(scope, element, attrs) {
+              scope.dialogStyle = {};
+              if (attrs.width)
+                scope.dialogStyle.width = attrs.width;
+              if (attrs.height)
+                scope.dialogStyle.height = attrs.height;
+              scope.hideModal = function() {
+                scope.show = false;
+              };
+            },
+            template: "<div class='ng-modal' ng-show='show'><div class='ng-modal-overlay'></div><div class='ng-modal-dialog' ng-style='dialogStyle'><div class='ng-modal-dialog-content' ng-transclude></div></div></div>" // See below
+          //template: "<div class='ng-modal' ng-show='show'><div class='ng-modal-overlay' ng-click='hideModal()'></div><div class='ng-modal-dialog' ng-style='dialogStyle'><div class='ng-modal-close' ng-click='hideModal()'>X</div><div class='ng-modal-dialog-content' ng-transclude></div></div></div>"
+          };
+        }); 
+       
+        app.controller('ColonoscopySigmoController' ,['$scope',function($scope){
+            $scope.userForm = {}; 
+            $scope.DiagnosisValues;
+            $scope.evntTypeValues;
+            $scope.indicationValues; 
+            $scope.ME = [];
+            $scope.SES = [];
+            
+            $scope.SESstaticScoringValues = [];
+            $scope.MEstaticScoringValues = [];
+
+            $scope.userForm.TotalVisualized = '-';
+            $scope.userForm.TotalOverallScore = '-';
+            $scope.userForm.mmeScore = '-';
+
+            $scope.formName = 'ColonoscopySigmo';
+            var today = new Date();
+
+            /*Method to load default values on page load*/
+            /*PageInit Start*/
+            $scope.pageInit = function() {
+                $scope.modalShown = true;
+                Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.Plexus_ColonoscopySigmoControllerPhase2.getInitInformation}','{!patientId}','{!recordId}','{!psspId}',
+                    function(result, event) {
+                        $scope.DiagnosisValues = result.diagnosisValues;
+                        $scope.evntTypeValues = result.evntTypeValues;
+                        $scope.indicationValues = result.indicationValues;
+                        $scope.SESstaticScoringValues = result.sesScoringValues;
+                        $scope.MEstaticScoringValues = result.meScoringValues;
+                        
+                        $scope.userForm.evntType = 'Select';
+                        $scope.userForm.indication = 'Select';
+                        
+                        if('{!recordId}' != null && '{!recordId}' != ''){
+                            $scope.userForm.pFirstname = result.pp.First_Name__c;
+                            $scope.userForm.physicianId = result.pp.CreatedById;
+                            $scope.userForm.physician = result.pp.CreatedBy.Name;     
+                            $scope.userForm.pLastname = result.pp.Last_Name__c;
+                            $scope.userForm.pDOB = result.pp.Date_of_Birth__c;
+                            $scope.userForm.siteId = result.siteId;
+                            $scope.userForm.studyId = result.studyId;
+                            $scope.userForm.patientId = result.pp.Patient_ID__c;
+                            $scope.userForm.condition = result.pcs.Diagnosis__c;
+                            var stdate = new Date(result.pcs.Date_of_Event__c);
+                            //$scope.userForm.evntDate =(stdate.getMonth() + 1) + '/' + stdate.getDate() + '/' +  stdate.getFullYear();
+                            $scope.userForm.evntDate = getFormattedDate(stdate);
+                            $scope.userForm.evntType = result.pcs.Event_Type__c;
+                            $scope.userForm.indication = result.pcs.Indication__c;
+                            $scope.userForm.pid = result.pp.Name;
+                            $scope.userForm.PreferredName = result.pp.Preferred_Name__c;
+                            $scope.userForm.gender = result.pp.Gender__c;
+                            
+                            if(result.pcs.Max_extent_of_exam__c != null){
+                                $scope.userForm.maxExOfExam = result.pcs.Max_extent_of_exam__c.toString();
+                            }
+                            if(result.pcs.Max_extent_of_active_disease__c != null){
+                                $scope.userForm.maxExOfActDis = result.pcs.Max_extent_of_active_disease__c.toString();
+                            }
+                            
+                            $scope.userForm.TotalVisualized = result.pcs.Total_Visualized__c;
+                            $scope.userForm.TotalOverallScore = result.pcs.Total_Overall_score__c;
+                            $scope.userForm.mmeScore = result.pcs.Modified_Mayo_Endoscopy_Score__c;
+                            
+                            $scope.userForm.dateFormSubmt = result.pcs.Form_Submitted_Date__c;
+                            if(result.pcs.Form_Submitted_Date__c != null){
+                                var dflate = new Date(result.pcs.Form_Submitted_Date__c);
+                                $scope.userForm.dateFormSubmt = getFormattedDate(dflate);
+                            }
+                            else{
+                                $scope.userForm.dateFormSubmt = null;
+                            }
+                            
+                            $scope.userForm.id = result.pcs.Id;
+                            if(result.pcs.LastModifiedBy.User_First_Name__c != null && result.pcs.LastModifiedBy.User_First_Name__c != ''){
+                                $scope.userForm.submittedBy = result.pcs.LastModifiedBy.User_First_Name__c +' '+result.pcs.LastModifiedBy.User_Last_Name__c;     
+                            }
+                            else{
+                                $scope.userForm.submittedBy = result.pcs.LastModifiedBy.Name;
+                            } 
+                            $scope.ME = result.pCSUCIBDMEList;
+                            $scope.SES = result.pCSCDCESList;  
+                        }
+                        else{
+                            $scope.userForm.pFirstname = result.pp.First_Name__c;
+                            $scope.userForm.physicianId = result.pp.CreatedById;
+                            $scope.userForm.physician = result.pp.CreatedBy.Name;   
+                            $scope.userForm.pLastname = result.pp.Last_Name__c;
+                            $scope.userForm.pDOB = result.pp.Date_of_Birth__c;
+                            $scope.userForm.siteId = result.siteId;
+                            $scope.userForm.studyId = result.studyId;
+                            $scope.userForm.patientId = result.pp.Patient_ID__c;
+                            $scope.userForm.condition = result.diagnosis;
+                            $scope.userForm.id = "";   
+                            $scope.userForm.pid= result.pp.Name;
+                            $scope.userForm.PreferredName= result.pp.Preferred_Name__c;
+                            $scope.userForm.gender= result.pp.Gender__c;
+                            
+                            $scope.ME = result.pCSUCIBDMEList;
+                            $scope.SES = result.pCSCDCESList; 
+                        }   
+                        
+                        //$scope.getMMEScore(); 
+                        $scope.toEnabaleDisable();
+                        $scope.modalShown = false;
+                        $scope.$apply();    
+                    },{escape: false}
+                );    
+            }
+            
+            $scope.meRowClicked = function(val,type,oldValue){
+                if($scope.ME[val].Visualized == 'No'){
+                    $scope.ME[val].Erythema = 'Select';
+                    $scope.ME[val].Vascular_pattern = 'Select';
+                    $scope.ME[val].Friability = 'Select';
+                    $scope.ME[val].Mucosal_breaks = 'Select';
+                    $scope.ME[val].Overall_score = 'Not seen';
+                }
+                else if(oldValue == 'No' && $scope.ME[val].Visualized != oldValue){
+                    $scope.ME[val].Overall_score = 'Select';
+                }
+                
+                if(val < $scope.ME.length-1){
+                    if($scope.ME[val].Visualized == 'No'){
+                        $scope.ME[val+1].readonly = false;
+                        $scope.meRowClicked(val+1,type);
+                    }
+                    else if($scope.ME[val].Visualized != 'No' && $scope.ME[val].Erythema != 'Select' 
+                            && $scope.ME[val].Vascular_pattern != 'Select' 
+                            && $scope.ME[val].Friability != 'Select'  &&  $scope.ME[val].Mucosal_breaks != 'Select' 
+                            && $scope.ME[val].Overall_score != 'Select'){
+                        $scope.ME[val+1].readonly = false;
+                        $scope.meRowClicked(val+1,type);
+                    }
+                    else{
+                        $scope.ME[val+1].readonly = true;
+                        $scope.ME[val+1].Visualized = 'Select';
+                        $scope.ME[val+1].Erythema = 'Select';
+                        $scope.ME[val+1].Vascular_pattern = 'Select';
+                        $scope.ME[val+1].Friability = 'Select';
+                        $scope.ME[val+1].Mucosal_breaks = 'Select';
+                        $scope.ME[val+1].Overall_score = 'Select';
+                        $scope.meRowClicked(val+1,type);
+                    }
+                }
+                
+                if(type == 'Visualized' || type == 'OvrScore'){
+                    $scope.getTotal(type,val);
+                }
+            }
+
+            $scope.getTotal = function(val,indx){
+                var total = 0;
+                var totalOver;
+                var hCount=0;
+
+                for(var i = 0; i < $scope.ME.length; i++){
+                    if(val == 'Visualized'){
+                        var value = $scope.ME[i].Visualized;
+                        if(value == 'No'){
+                            total = total + 0;
+                        }
+                        else if(value == 'Yes - Uninflamed'){
+                            total = total + 0;
+                        }
+                        else if(value == 'Yes - Inflamed'){
+                            total = total + 1;
+                        }
+                        
+                        
+                        var value = $scope.ME[i].Overall_score;
+                        if(value != 'Select' && value != 'Not seen'){
+                            if(totalOver == null){
+                                totalOver = parseInt(value);
+                            }
+                            else{    
+                                totalOver = totalOver + parseInt(value);
+                            }
+                        } 
+                        else if(value != null){
+                            hCount++;
+                        }
+                    }
+                    else if(val == 'OvrScore'){
+                        var value = $scope.ME[i].Overall_score;
+                        if(value != 'Select' && value != 'Not seen'){
+                            if(totalOver == null){
+                                totalOver = parseInt(value);
+                            }
+                            else{    
+                                totalOver = totalOver + parseInt(value);
+                            }
+                        } 
+                        else if(value != null){
+                            hCount++;
+                        }
+                    }
+                }
+                
+                if(val == 'Visualized'){
+                    $scope.userForm.TotalVisualized = total;
+                    
+                    if(totalOver >= 0){
+                        $scope.userForm.TotalOverallScore = totalOver;
+                    }
+                    else{
+                        if(hCount > 0){
+                            $scope.userForm.TotalOverallScore = 'Not seen';
+                        }
+                        else{
+                            $scope.userForm.TotalOverallScore = '-';
+                        }
+                    }
+                }
+                else if(val == 'OvrScore'){     
+                    if(totalOver >= 0){
+                        $scope.userForm.TotalOverallScore = totalOver;
+                    }
+                    else{
+                        if(hCount > 0){
+                            $scope.userForm.TotalOverallScore = 'Not seen';
+                        }
+                        else{
+                            $scope.userForm.TotalOverallScore = '-';
+                        }
+                    }  
+                }
+                $scope.getMMEScore();
+            }
+            
+            $scope.getCDTotal = function(val){
+                var total;
+                for(var i = 0; i < $scope.SES.length; i++){
+                    if(val == 'Ileum'){
+                        var value = $scope.SES[i].Ileum;
+                        if(value != null && value != 'Not reached'){
+                            if(total == null){
+                                total = parseInt(value);
+                            }
+                            else{    
+                                total = total + parseInt(value);
+                            }
+                        } 
+                    }
+                    else if(val == 'RightColon'){
+                        var value = $scope.SES[i].Right_colon;
+                        if(value != null && value != 'Not reached'){
+                            if(total == null){
+                                total = parseInt(value);
+                            }
+                            else{    
+                                total = total + parseInt(value);
+                            }
+                        } 
+                    }
+                    else if(val == 'TVColon'){
+                        var value = $scope.SES[i].TV_colon;
+                        if(value != null && value != 'Not reached'){
+                            if(total == null){
+                                total = parseInt(value);
+                            }
+                            else{    
+                                total = total + parseInt(value);
+                            }
+                        }
+                    }
+                    else if(val == 'LeftColon'){
+                        var value = $scope.SES[i].Left_colon;
+                        if(value != null && value != 'Not reached'){
+                            if(total == null){
+                                total = parseInt(value);
+                            }
+                            else{    
+                                total = total + parseInt(value);
+                            }
+                        } 
+                    }
+                    else if(val == 'Rectum'){
+                        var value = $scope.SES[i].Rectum;
+                        if(value != null && value != 'Not reached'){
+                            if(total == null){
+                                total = parseInt(value);
+                            }
+                            else{    
+                                total = total + parseInt(value);
+                            }
+                        } 
+                    }
+                }
+                
+                if(val == 'Ileum'){
+                    if(total >= 0){
+                        $scope.userForm.TotCDCol1 = total +' out of 12';
+                    }
+                    else {
+                        $scope.userForm.TotCDCol1 = 'Not reached';
+                    }
+                }
+                else if(val == 'RightColon'){
+                    if(total >= 0){
+                        $scope.userForm.TotCDCol2 = total +' out of 12';
+                    }
+                    else {
+                        $scope.userForm.TotCDCol2 = 'Not reached';
+                    }
+                }
+                else if(val == 'TVColon'){
+                    if(total >= 0){
+                        $scope.userForm.TotCDCol3 = total +' out of 12';
+                    }
+                    else {
+                        $scope.userForm.TotCDCol3 = 'Not reached';
+                    }
+                }
+                else if(val == 'LeftColon'){
+                    if(total >= 0){
+                        $scope.userForm.TotCDCol4 = total +' out of 12';
+                    }
+                    else {
+                        $scope.userForm.TotCDCol4 = 'Not reached';
+                    }
+                }
+                else if(val == 'Rectum'){
+                    if(total >= 0){
+                        $scope.userForm.TotCDCol5 = total +' out of 12';
+                    }
+                    else {
+                        $scope.userForm.TotCDCol5 = 'Not reached';
+                    }
+                }
+            }
+            
+            $scope.toEnabaleDisable = function(){
+                for(var val = 0;val< $scope.ME.length-1;val++){
+                    if(val < $scope.ME.length){
+                        if($scope.ME[val].Visualized == 'No' || ($scope.ME[val].Visualized != 'Select' && $scope.ME[val].Erythema != 'Select' 
+                            && $scope.ME[val].Vascular_pattern != 'Select' 
+                            && $scope.ME[val].Friability != 'Select' &&  $scope.ME[val].Mucosal_breaks != 'Select' 
+                            &&  $scope.ME[val].Overall_score != 'Select')){
+
+                            $scope.ME[val+1].readonly = false;
+                        }
+                        else{
+                            $scope.ME[val+1].readonly = true;
+                        }
+                    }
+                }
+                for(var val = 0;val< $scope.SES.length-1;val++){
+                    if($scope.SES[val].Ileum != null && $scope.SES[val].Right_colon != null
+                            && $scope.SES[val].TV_colon != null &&  $scope.SES[val].Left_colon != null
+                            &&  $scope.SES[val].Rectum != null){
+                            
+                        $scope.SES[val+1].sesreadonly = false;
+                    }
+                    else{
+                       $scope.SES[val+1].sesreadonly = true;
+                    }
+                }
+                
+                for(var val = 0;val< $scope.SES.length-1;val++){
+                    if(val < $scope.SES.length){
+                        if($scope.SES[val].sizeOfUlcer == 'Not reached' || ($scope.SES[val].sizeOfUlcer != 'Select' && $scope.SES[val].ulcerSurface != 'Select' && $scope.SES[val].affectSurface != 'Select' 
+                            && $scope.SES[val].presNarrow != 'Select' 
+                            )){
+
+                            $scope.SES[val+1].sesreadonly = false;
+                        }
+                        else{
+                            $scope.SES[val+1].sesreadonly = true;
+                        }
+                    }
+                }
+            }
+         
+            var sizeOfUlcerMap = {'None':0,'Aphthous ulcers (0.1-0.5 cm)':1,'Large ulcers (0.5-2 cm)':2,
+                                    'Very large ulcers (>2 cm)':3};
+                                    
+            var ulcerSurfaceMap = {'None':0,'<10':1,'10-30':2,'>30':3};
+            
+            var affectSurfaceMap = {'Unaffected':0,'<50':1,'50-75':2,'>75':3};
+            
+            var presNarrowMap = {'None':0,'Single, can be passed':1,'Multiple, can be passed':2,'Cannot be passed':3};
+            
+            $scope.getSESTotal = function(index,type,oldValue){
+                var total = null;
+                if($scope.SES[index].sizeOfUlcer != 'Select' && $scope.SES[index].sizeOfUlcer != 'Not reached'){
+                    if(total == null){
+                        total = sizeOfUlcerMap[$scope.SES[index].sizeOfUlcer];
+                    }
+                    else{    
+                        total = total + sizeOfUlcerMap[$scope.SES[index].sizeOfUlcer];
+                    } 
+                }  
+                
+                if($scope.SES[index].ulcerSurface != 'Select' && $scope.SES[index].ulcerSurface != 'Not reached'){
+                    if(total == null){
+                        total = ulcerSurfaceMap[$scope.SES[index].ulcerSurface];
+                    }
+                    else{    
+                        total = total + ulcerSurfaceMap[$scope.SES[index].ulcerSurface];
+                    }
+                }  
+                
+                if($scope.SES[index].affectSurface != 'Select' && $scope.SES[index].affectSurface != 'Not reached'){
+                    if(total == null){
+                        total = affectSurfaceMap[$scope.SES[index].affectSurface];
+                    }
+                    else{    
+                        total = total + affectSurfaceMap[$scope.SES[index].affectSurface];
+                    }
+                } 
+                
+                if($scope.SES[index].presNarrow != 'Select' && $scope.SES[index].presNarrow != 'Not reached'){
+                    if(total == null){
+                        total = presNarrowMap[$scope.SES[index].presNarrow];
+                    }
+                    else{    
+                        total = total + presNarrowMap[$scope.SES[index].presNarrow];
+                    }
+                }  
+                
+                if(total != null){
+                    $scope.SES[index].total = total;    
+                }
+                else{
+                    if($scope.SES[index].sizeOfUlcer == 'Not reached' || $scope.SES[index].ulcerSurface == 'Not reached' 
+                            || $scope.SES[index].affectSurface == 'Not reached' || $scope.SES[index].presNarrow == 'Not reached'){
+                        $scope.SES[index].total = 'Not reached';
+                    }
+                    else{
+                        $scope.SES[index].total = null;
+                    }
+                }
+                
+                
+                if($scope.SES[index].sizeOfUlcer == 'Not reached'){
+                    $scope.SES[index].ulcerSurface = 'Select';
+                    $scope.SES[index].affectSurface = 'Select';
+                    $scope.SES[index].presNarrow = 'Select';                    
+                    //$scope.SES[index].Overall_score = 'Not seen';
+                }
+                else if(oldValue == 'Not reached' && $scope.SES[index].sizeOfUlcer != oldValue){
+                   // $scope.SES[index].Overall_score = 'Select';
+                }
+                
+                if(index < $scope.SES.length-1){
+                    if($scope.SES[index].sizeOfUlcer == 'Not reached'){
+                        $scope.SES[index+1].sesreadonly = false;
+                        $scope.getSESTotal(index+1,type);
+                    }
+                    else if($scope.SES[index].sizeOfUlcer != 'Not reached' && $scope.SES[index].ulcerSurface != 'Select' 
+                            && $scope.SES[index].affectSurface != 'Select' 
+                            && $scope.SES[index].presNarrow != 'Select'  
+                            ){
+                        $scope.SES[index+1].sesreadonly = false;
+                        $scope.getSESTotal(index+1,type);
+                    }
+                    else{
+                        $scope.SES[index+1].sesreadonly = true;
+                        $scope.SES[index+1].sizeOfUlcer = 'Select';
+                        $scope.SES[index+1].ulcerSurface = 'Select';
+                        $scope.SES[index+1].affectSurface = 'Select';
+                        $scope.SES[index+1].presNarrow = 'Select';                        
+                        //$scope.SES[index+1].Overall_score = 'Select';
+                        $scope.getSESTotal(index+1,type);
+                    }
+                }
+                
+                
+                
+            } 
+            
+            $scope.datejQueryToAngularJs = function(){
+                $scope.userForm.evntDate = $("#evntDate").val();
+            }
+            
+            $scope.validationRules = function(){
+                if($scope.userForm.evntDate == null || $scope.userForm.evntDate == '' ||
+                                $scope.userForm.evntType == null || $scope.userForm.evntType == 'Select'){
+                    alert("Please provide the required field(s) to continue.");
+                    return false;
+                }
+                if($scope.userForm.indication == null || $scope.userForm.indication == 'Select'){
+                    alert("Please provide a value for 'Indication'");
+                    return false; 
+                }
+                if(!isValidDate($scope.userForm.evntDate)){
+                    alert("Please select a valid 'Event Date'");
+                    return false;
+                }
+                var eventd = new Date($scope.userForm.evntDate);  
+                if(eventd > today){
+                    alert("'Event Date' cannot be a future date.");
+                    return false;
+                }
+                var dob = new Date($scope.userForm.pDOB);  
+                    if(dob >= eventd){
+                        alert("'Event Date' should be greater than the 'Date of Birth'.");
+                        return false;
+                }
+                
+                if($scope.userForm.condition == 'Ulcerative Colitis' || $scope.userForm.condition == 'IBD Unspecified'){
+                    if(($scope.userForm.maxExOfExam == null || $scope.userForm.maxExOfExam == '')  
+                            && ($scope.userForm.maxExOfActDis == null || $scope.userForm.maxExOfActDis == '')){
+                        alert("Please provide a value for 'Maximum extent of exam' and 'Maximum extent of active disease'");
+                        return false;
+                    }
+                    
+                    if($scope.userForm.maxExOfExam == null || $scope.userForm.maxExOfExam == ''){
+                        alert("Please provide a value for 'Maximum extent of exam'");
+                        return false;   
+                    }
+                    
+                    if($scope.userForm.maxExOfActDis == null || $scope.userForm.maxExOfActDis == ''){
+                        alert("Please provide a value for 'Maximum extent of active disease'");
+                        return false;   
+                    }
+
+                    /*if($scope.userForm.maxExOfExam.charAt(0) == '0'){
+                        alert("Please provide a valid value for 'Maximum extent of exam'.");
+                        return false;
+                    }
+                    if($scope.userForm.maxExOfActDis.charAt(0) == '0'){
+                        alert("Please provide a valid value for 'Maximum extent of active disease'.");
+                        return false;
+                    }*/
+                }  
+                
+                if($scope.userForm.condition == 'Ulcerative Colitis' || $scope.userForm.condition == 'IBD Unspecified'){
+                    for(var i=0; i<$scope.ME.length;i++){
+                        if($scope.ME[i].Visualized != 'No' && !( $scope.ME[i].Erythema != 'Select' 
+                                && $scope.ME[i].Vascular_pattern != 'Select' 
+                                && $scope.ME[i].Friability != 'Select'  &&  $scope.ME[i].Mucosal_breaks != 'Select' 
+                                &&  $scope.ME[i].Overall_score != 'Select')){
+                            alert("Mayo Endoscopic score must be completed for all locations to submit this form.");
+                            return false;
+                        }
+                    }
+                }
+                else if($scope.userForm.condition == 'Crohn\'s Disease'){
+                    for(var i=0; i<$scope.SES.length;i++){
+                       /* if(!($scope.SES[i].location != 'Select' && $scope.SES[i].sizeOfUlcer != 'Select'
+                                        && $scope.SES[i].ulcerSurface != 'Select' &&  $scope.SES[i].affectSurface != 'Select'
+                                        &&  $scope.SES[i].presNarrow != 'Select')){
+                                alert("SES-CD must be completed for all locations to submit this form.");
+                                return false;
+                        }*/
+                        if($scope.SES[i].sizeOfUlcer != 'Not reached' && !( $scope.SES[i].ulcerSurface != 'Select' 
+                                && $scope.SES[i].affectSurface != 'Select' 
+                                && $scope.SES[i].presNarrow != 'Select')){
+                            alert("SES-CD must be completed for all locations to submit this form.");
+                            return false;
+                        }
+                    }
+                }
+                
+                return true;
+            }
+            
+            var saveButtonStatus = false;
+            $scope.SaveClick = function(){
+                if(saveButtonStatus == true){
+                    return; 
+                } 
+                $scope.datejQueryToAngularJs();
+                
+                if($scope.userForm.evntDate == null || $scope.userForm.evntDate == '' ||
+                                $scope.userForm.evntType == null || $scope.userForm.evntType == 'Select'){
+                    alert("Please provide the required field(s) to continue.");
+                    return;
+                }
+                
+                if(!isValidDate($scope.userForm.evntDate)){
+                    alert("Please select the valid 'Event Date'");
+                    return;
+                }
+                var eventd = new Date($scope.userForm.evntDate);  
+                if(eventd > today){
+                    alert("'Event Date' cannot be a future date.");
+                    return;
+                }
+                var dob = new Date($scope.userForm.pDOB);  
+                    if(dob >= eventd){
+                        alert("'Event Date' should be greater than the 'Date of Birth'.");
+                        return false;
+                }
+                
+                saveButtonStatus = true;
+                $scope.userForm.formStatus = 'Saved';
+                Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.Plexus_ColonoscopySigmoControllerPhase2.insertForm}',$scope.userForm,$scope.ME,$scope.SES,'{!patientId}','{!recordId}','{!psspId}',
+                    function(result, event) {
+ 
+                        window.location = "{!$page.Plexus_ColonoscopySigmoViewphase2}?Id="+result.pcs.Id+"&pId={!patientId}&sId={!studySFId}&pssId={!psspId}";    
+                    },{escape: false}
+                );
+             }
+             
+             var saveSubButtonStatus = false;
+             $scope.SubmitClick = function(){
+                if(saveSubButtonStatus == true){
+                    return; 
+                } 
+                $scope.datejQueryToAngularJs();
+                if($scope.validationRules() != false) { 
+                    var r = confirm("Once submitted the form cannot be modified. Press 'OK' to submit.");
+                    if (r == true) {
+                        saveSubButtonStatus = true;
+                        $scope.userForm.formStatus = 'Submitted';
+                        Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.Plexus_ColonoscopySigmoControllerPhase2.insertForm}',$scope.userForm,$scope.ME,$scope.SES,'{!patientId}','{!recordId}','{!psspId}',
+                            function(result, event) {
+                                saveSubButtonStatus = false;
+                                window.location = "{!$page.Plexus_ColonoscopySigmoViewphase2}?Id="+result.pcs.Id+"&pId={!patientId}&sId={!studySFId}&pssId={!psspId}";
+                            },{escape: false}
+                        );
+                     } 
+                     else {
+                        return;
+                     }
+                 }
+             }
+             
+             $scope.CancelClick = function(){  
+                 if('{!formMode}' == 'Edit'){
+                      window.location = "{!$page.Plexus_ColonoscopySigmoViewphase2}?Id="+$scope.userForm.id+"&pId={!patientId}&sId={!studySFId}&pssId={!psspId}";
+                  }
+                  else{
+                      window.location = "{!$page.Plexus_PatientPage}?id={!patientId}&sId={!studySFId}&pssId={!psspId}&mode=View";
+                  }         
+             }
+              
+              $scope.getMMEScore = function(){
+                  if(!isNaN(+$scope.userForm.TotalOverallScore) && angular.isNumber(+$scope.userForm.TotalOverallScore)) { 
+                      if($scope.userForm.maxExOfActDis != null && $scope.userForm.maxExOfActDis != ''){
+                          var baseVal = parseInt($scope.userForm.TotalOverallScore) * (parseInt($scope.userForm.maxExOfActDis)/10);
+                          if(!isNaN(+$scope.userForm.TotalVisualized) && angular.isNumber(+$scope.userForm.TotalVisualized)){
+                              if(parseInt($scope.userForm.TotalVisualized) > 0){
+                                  $scope.userForm.mmeScore = +(Math.round(baseVal/parseInt($scope.userForm.TotalVisualized) + "e+2")  + "e-2");
+                              }   
+                              else{
+                                  $scope.userForm.mmeScore = 0;
+                              }
+                          } 
+                          else{
+                              $scope.userForm.mmeScore = 0;
+                          }
+                      }
+                      else{
+                          $scope.userForm.mmeScore = 0;
+                      }
+                  }
+                  else{
+                      $scope.userForm.mmeScore = 0;
+                  }
+              }
+              if(!($scope.userForm.mmeScore != null && $scope.userForm.mmeScore != '-')){
+                  $scope.userForm.mmeScore = 0;
+              }
+            
+        }]);
+        
+        function isValidDate(date){
+            var matches = /^(\d{2})[-\/](\d{2})[-\/](\d{4})$/.exec(date);
+            if (matches == null) return false;
+            var d = matches[2];
+            var m = matches[1] - 1;
+            var y = matches[3];
+            var composedDate = new Date(y, m, d);
+            return composedDate.getDate() == d &&
+                    composedDate.getMonth() == m &&
+                    composedDate.getFullYear() == y;
+        }
+        
+        function getFormattedDate(date) {
+        //alert('Before '+date);
+          var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
+          //alert('After '+newDate);
+          var year = newDate.getFullYear();
+          var month = (1 + newDate.getMonth()).toString();
+          month = month.length > 1 ? month : '0' + month;
+          var day = newDate.getDate().toString();
+          day = day.length > 1 ? day : '0' + day;
+          return month + '/' + day + '/' + year;
+        }
+        
+    </script>
+    <div ng-app="MyApp" class="ng-cloak">
+    <div ng-controller="ColonoscopySigmoController" data-ng-init="pageInit()">
+        <div style="{!IF(isAdmin == 'Yes','display:none','display:block')}">
+            <c:Plexus_Header > </c:Plexus_Header>
+        </div>
+        <div class="{!IF(isAdmin == 'Yes','','landing-container')}">
+        <div>
+            <modal-dialog show='modalShown'>
+                <div class="bar">
+                <p>loading</p>
+                </div>
+            </modal-dialog> 
+        </div>
+        
+        <apex:form style="padding-left: 25px;padding-right: 25px;padding-bottom: 25px;">
+        <h3 style="font-size: 24px;font-weight: normal;font-family: Arial,Helvetica,sans-serif;">Colonoscopy – Sigmoidoscopy</h3><br/><br/>
+        
+        <apex:pageblock mode="detail" id="leadPB" title="Colonoscopy – Sigmoidoscopy Edit">
+            <apex:pageblockbuttons location="top">
+                <input type="button" class="btn" value = "Cancel" ng-click="CancelClick()" style="background:#FCFCFC;border: 1px solid #b5b5b5;border-bottom-color:#7f7f7f;height: 22px;"/>
+                <input type="button" class="btn" value = "Save" ng-click="SaveClick()" style="background:#FCFCFC;border: 1px solid #b5b5b5;border-bottom-color:#7f7f7f;height: 22px;"/>
+                <input type="button" class="btn" value = "Save & Submit" ng-click="SubmitClick()" style="background:#FCFCFC;border: 1px solid #b5b5b5;border-bottom-color:#7f7f7f;height: 22px;"/>
+            </apex:pageblockbuttons>
+            <apex:pagemessages ></apex:pagemessages>
+            <div class="pageBlockSection">Patient Information</div>
+            <c:Plexus_BasicInfo ></c:Plexus_BasicInfo>
+            
+            <div class="pageBlockSection">Admission Information</div>
+            <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                <tr width="100%" height="30px">
+                    <td align="right" width="20%" style="vertical-align: middle;">
+                        <label class="labelCol" style="display:inherit;">Event Type<abbr class="req" >*</abbr></label>
+                    </td>
+                    <td width="20%" style="vertical-align: middle;">
+                        <select ng-model="userForm.evntType" ng-options="val for val in evntTypeValues" style="display: inherit;margin-left:10px;margin-top: 3px;"> 
+                        </select>
+                    </td>
+                    
+                    <td align="right" width="20%" style="vertical-align: middle;">
+                        <label class="labelCol" style="display:inherit;">Diagnosis</label>
+                    </td>
+                    <td width="30%" style="vertical-align: middle;">
+                        <label style="display: inherit;padding-left:10px;margin-top: 3px;">
+                        {{userForm.condition}}
+                        </label>
+                    </td>
+                </tr>
+                
+                <tr width="100%" height="30px">
+                    <td align="right" width="20%" style="vertical-align: middle;">
+                        <label class="labelCol" style="display:inherit;">Event Date<abbr class="req" >*</abbr></label>
+                    </td>
+                    <td width="20%" style="vertical-align: middle;">
+                        <input type="text" class="dataCpl" id="evntDate" ng-model="userForm.evntDate" readonly="true" style="display: inherit;margin-left:10px;margin-top: 3px;width:160px;height:19;"/>
+                    </td>
+                    
+                    <td align="right" width="20%" style="vertical-align: middle;">
+                        <label class="labelCol" style="display:inherit;">Indication</label>
+                    </td>
+                    <td width="30%" style="vertical-align: middle;">
+                        <select ng-model="userForm.indication" ng-options="val for val in indicationValues" style="display: inherit;margin-left:10px;margin-top: 3px;"> 
+                        </select>
+                    </td>
+                </tr>
+            </table>
+            
+            <div ng-show="userForm.condition == 'Ulcerative Colitis' || userForm.condition == 'IBD Unspecified'">
+            <div class="form-style-2-heading">Colonoscopy – Sigmoidoscopy Results for Ulcerative Colitis or IBD-U</div><br/>
+            <b>Modified Mayo Endoscopic Score template</b><br/><br/>
+            <table width="100%" border="1" cellpadding="0" cellspacing="0">
+            <thead>
+                <tr height="30px">
+                    <th width="10%" align="center" style="vertical-align: middle; text-align: center;">Location</th>
+                    <th width="15%" align="center" style="vertical-align: middle; text-align: center;">Visualized</th>
+                    <th width="12%" align="center" style="vertical-align: middle;text-align: center;">Erythema</th>
+                    <th width="12%" align="center" style="vertical-align: middle;text-align: center;">Vascular pattern</th>
+                    <th width="29%" align="center" style="vertical-align: middle;text-align: center;">Friability</th>
+                    <th width="12%" align="center" style="vertical-align: middle;text-align: center;">Mucosal breaks</th>
+                    <th width="10%" align="center" style="vertical-align: middle;text-align: center;">Overall score</th>
+                </tr>
+            </thead>
+            <tbody>
+                <ng-form name="urlForm">
+                <tr height="30px" ng-repeat="x in ME  track by $index">
+                    <td align="center" style="vertical-align: middle;" width="10%">{{x.Location}}</td>
+                    <td width="15%" align="center">
+                        <select ng-model="x.Visualized" style="width:80%;white-space: pre-wrap;margin-top: 3px;" ng-change="meRowClicked($index,'Visualized','{{x.Visualized}}')" ng-readonly="x.readonly" ng-disabled="x.readonly">
+                            <option value="Select">Select</option>
+                            <option value="No">No</option>
+                            <option value="Yes - Uninflamed">Yes - Uninflamed</option>
+                            <option value="Yes - Inflamed">Yes - Inflamed</option>
+                        </select>
+                        (Mayo>0) 
+                    </td>
+                    <td width="12%" align="center">
+                        <select ng-model="x.Erythema" style="width:80%;white-space: pre-wrap;" ng-change="meRowClicked($index,null,null)" ng-readonly="x.readonly" ng-disabled="x.readonly || (x.Visualized == 'Select' || x.Visualized == 'No')">
+                            <option value="Select">Select</option>
+                            <option value="None">None</option>
+                            <option value="Mild">Mild</option>
+                            <option value="Marked">Marked</option>
+                        </select>
+                    </td>
+                    <td width="12%" align="center">
+                        <select ng-model="x.Vascular_pattern" style="width:80%;white-space: pre-wrap;" ng-change="meRowClicked($index,null,null)" ng-readonly="x.readonly" ng-disabled="x.readonly || (x.Visualized == 'Select' || x.Visualized == 'No')">
+                            <option value="Select">Select</option>
+                            <option value="Normal">Normal</option>
+                            <option value="Decreased">Decreased</option>
+                            <option value="Absent">Absent</option>
+                        </select>
+                    </td>
+                    <td width="29%" align="center">
+                        <select ng-model="x.Friability" style="width:80%;white-space: pre-wrap;" ng-change="meRowClicked($index,null,null)" ng-readonly="x.readonly" ng-disabled="x.readonly || (x.Visualized == 'Select' || x.Visualized == 'No')">
+                            <option value="Select">Select</option>
+                            <option value="Normal">Normal</option>
+                            <option value="Friable without spontaneous bleeding">Friable without spontaneous bleeding</option>
+                            <option value="Spontaneous bleeding">Spontaneous bleeding</option>
+                        </select>
+                    </td>
+                    <td width="12%" align="center">
+                        <select ng-model="x.Mucosal_breaks" style="width:80%;white-space: pre-wrap;" ng-change="meRowClicked($index,null,null)" ng-readonly="x.readonly" ng-disabled="x.readonly || (x.Visualized == 'Select' || x.Visualized == 'No')">
+                            <option value="Select">Select</option>
+                            <option value="None">None</option>
+                            <option value="Erosions">Erosions</option>
+                            <option value="Ulcerations">Ulcerations</option>
+                        </select>
+                    </td>
+                    <td width="10%" align="center">
+                        <select ng-model="x.Overall_score" style="width:80%;white-space: pre-wrap;" ng-change="meRowClicked($index,'OvrScore',null)"  ng-readonly="x.readonly" ng-disabled="x.readonly || (x.Visualized == 'Select' || x.Visualized == 'No')">
+                            <option value="Select">Select</option>
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="Not seen">Not seen</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr height="30px">
+                    <td align="center" style="vertical-align: middle;"> Total(sum) </td>
+                    <td align="center" style="vertical-align: middle;">{{userForm.TotalVisualized}} (0-5)</td>
+                    <td align="center" style="vertical-align: middle;">-</td>
+                    <td align="center" style="vertical-align: middle;">-</td>
+                    <td align="center" style="vertical-align: middle;">-</td>
+                    <td align="center" style="vertical-align: middle;">-</td>
+                    <td align="center" style="vertical-align: middle;">{{userForm.TotalOverallScore}} (0-15)</td>
+                </tr>
+                </ng-form>
+            </tbody>
+            </table><br/><br/>
+            <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                <tr width="100%" height="30px">
+                <td align="right" width="20%" style="vertical-align: middle;">
+                <label class="labelCol" style="display:inherit;">Maximum extent of exam</label>
+                </td>
+                <td width="20%" style="vertical-align: middle;">
+                    <label>
+                    <input type="text" onkeypress="return isNumber(event)" maxlength="3" class="dataCpl" id="maxExOfExam" ng-model="userForm.maxExOfExam" style="display: inherit;margin-left:10px;margin-top: 3px;width:160px;height:19;"/>&nbsp;cm
+                    </label>
+                </td>
+                <td width="50%"/>
+                </tr>
+        
+                <tr width="100%" height="30px">
+                    <td align="right" width="20%" style="vertical-align: middle;">
+                    <label class="labelCol" style="display:inherit;">Maximum extent of active disease</label>
+                    </td>
+                    <td width="20%" style="vertical-align: middle;">
+                        <label>
+                        <input type="text" onkeypress="return isNumber(event)" ng-change ="getMMEScore();" maxlength="3" class="dataCpl" id="maxExOfActDis" ng-model="userForm.maxExOfActDis" style="display: inherit;margin-left:10px;margin-top: 3px;width:160px;height:19;"/>&nbsp;cm
+                        </label>
+                    </td>
+                    <td width="50%"/>
+                </tr>
+                
+                <tr width="100%" height="30px">
+                    <td align="right" width="20%" style="vertical-align: middle;">
+                    <label class="labelCol" style="display:inherit;">Modified Mayo Endoscopy Score</label>
+                    </td>
+                    <td width="20%" style="vertical-align: middle;">
+                        <label for="pdob" class="dataCol" id="mmesc" style="display: inherit;margin-left:10px;margin-top: 3px;">
+                        {{userForm.mmeScore}}
+                        </label>    
+                    </td>
+                    <td width="50%"/>
+                </tr>
+             </table><br/><br/>
+             
+             <div><b>Modified Mayo Endoscopy Score</b></div><br/>
+            <table width="100%" border="1" cellpadding="0" cellspacing="0">
+            <tbody>
+            <tr width="100%" height="30px" ng-repeat="x in MEstaticScoringValues track by $index">
+            <td width="10%" align="center" style="vertical-align: middle; text-align: center;">{{x.Name}}</td>
+            <td width="80%" style="vertical-align: middle;padding-left:3px;">{{x.Value__c}}</td>
+            </tr>
+            <tr width="100%" height="30px">
+            <td colSpan="2" style="vertical-align: middle;padding-left:3px">
+            * Erosions are superficial mucosal breaks &lt; 5mm in width
+            </td>
+            </tr>
+            
+            </tbody>
+            </table>
+            </div>
+            
+            <div ng-show="userForm.condition == 'Crohn\'s Disease'">
+            <div class="form-style-2-heading">Colonoscopy – Sigmoidoscopy Results for Crohn’s Disease</div><br/>
+            <b>SES-CD</b> <br/><br/>
+            <table width="100%" border="1" cellpadding="0" cellspacing="0">
+            <thead>
+                <tr height="30px">
+                    <th width="15%" align="center" style="vertical-align: middle; text-align: center;">Location</th>
+                    <th width="24%" align="center" style="vertical-align: middle; text-align: center;">Size of ulcers</th>
+                    <th width="15%" align="center" style="vertical-align: middle; text-align: center;">Ulcerated surface (%)</th>
+                    <th width="15%" align="center" style="vertical-align: middle; text-align: center;">Affected surface (%)</th>
+                    <th width="21%" align="center" style="vertical-align: middle; text-align: center;">Presence of narrowings</th>
+                    <th width="10%" align="center" style="vertical-align: middle; text-align: center;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr height="30px" ng-repeat="x in SES  track by $index" >
+                    <td align="center" width="15%" style="vertical-align: middle;">{{x.location}}</td>
+                    <td width="24%" align="center" style="vertical-align:middle">
+                        <select ng-model="x.sizeOfUlcer" style="width:80%;white-space: pre-wrap;" ng-change="getSESTotal($index,'sizeOfUlcer','{{x.sizeOfUlcer}}')" ng-readonly="x.sesreadonly" ng-disabled="x.sesreadonly">
+                            <option value="Select">Select</option>
+                            <option value="None">None</option>
+                            <option value="Aphthous ulcers (0.1-0.5 cm)">Aphthous ulcers (0.1-0.5 cm)</option>
+                            <option value="Large ulcers (0.5-2 cm)">Large ulcers (0.5-2 cm)</option>
+                            <option value="Very large ulcers (>2 cm)">Very large ulcers (>2 cm)</option>
+                            <option value="Not reached">Not reached</option>
+                        </select>
+                    </td>
+                    <td width="15%" align="center" style="vertical-align:middle">
+                        <select ng-model="x.ulcerSurface" style="width:80%;white-space: pre-wrap;" ng-change="getSESTotal($index,null,null)" ng-readonly="x.sesreadonly" ng-disabled="x.sesreadonly || (x.sizeOfUlcer == 'Select' || x.sizeOfUlcer == 'Not reached')">
+                            <option value="Select">Select</option>
+                            <option value="None">None</option>
+                            <option value="<10">&lt;10</option>
+                            <option value="10-30">10-30</option>
+                            <option value=">30">&gt;30</option>
+                        </select>
+                    </td>
+                    <td width="15%" align="center" style="vertical-align:middle">
+                         <select ng-model="x.affectSurface" style="width:80%;white-space: pre-wrap;" ng-change="getSESTotal($index,null,null)" ng-readonly="x.sesreadonly" ng-disabled="x.sesreadonly || (x.sizeOfUlcer == 'Select' || x.sizeOfUlcer == 'Not reached')">
+                            <option value="Select">Select</option>
+                            <option value="Unaffected">Unaffected</option>
+                            <option value="<50">&lt;50</option>
+                            <option value="50-75">50-75</option>
+                            <option value=">75">&gt;75</option>
+                        </select>
+                    </td>
+                    <td width="21%" align="center" style="vertical-align:middle">
+                        <select ng-model="x.presNarrow" style="width:80%;white-space: pre-wrap;" ng-change="getSESTotal($index,null,null)" ng-readonly="x.sesreadonly" ng-disabled="x.sesreadonly || (x.sizeOfUlcer == 'Select' || x.sizeOfUlcer == 'Not reached')">
+                            <option value="Select">Select</option>
+                            <option value="None">None</option>
+                            <option value="Single, can be passed">Single, can be passed</option>
+                            <option value="Multiple, can be passed">Multiple, can be passed</option>
+                            <option value="Cannot be passed">Cannot be passed</option>
+                        </select>
+                    </td>
+                    <td width="10%" align="center" style="vertical-align:middle">
+                        {{x.total != null ? x.total+' ' : ' - '}}<label ng-show="x.total != 'Not reached'">(0-12)</label>
+                    </td>   
+                </tr>
+            
+            </tbody>
+            </table><br/><br/>
+    
+            <div><b>SES Scoring System</b></div> <br/>
+            <table width="100%" border="1" cellpadding="0" cellspacing="0">
+            <thead>
+                <tr height="30px">
+                    <th width="20%" align="center" style="vertical-align: middle; text-align: center;">SES-CD</th>
+                    <th width="20%" align="center" style="vertical-align: middle; text-align: center;">0</th>
+                    <th width="20%" align="center" style="vertical-align: middle; text-align: center;">1</th>
+                    <th width="20%" align="center" style="vertical-align: middle; text-align: center;">2</th>
+                    <th width="20%" align="center" style="vertical-align: middle; text-align: center;">3</th>
+                </tr>
+            </thead>
+            <tbody>
+            <tr height="30px" ng-repeat="x in SESstaticScoringValues track by $index" >
+                <td align="center" width="20%" style="vertical-align: middle; text-align: center;">{{x.Feature__c}}</td>
+                <td width="20%" align="center" style="vertical-align: middle; text-align: center;">{{x.Zero__c}}</td>
+                <td width="20%" align="center" style="vertical-align: middle; text-align: center;">{{x.One__c}}</td>
+                <td width="20%" align="center" style="vertical-align: middle; text-align: center;">{{x.Two__c}}</td>
+                <td width="20%" align="center" style="vertical-align: middle; text-align: center;">{{x.Three__c}}</td>
+            </tr>
+            </tbody>
+            </table>
+            </div>
+        </apex:pageblock>
+        </apex:form>
+    </div>
+         <div style="{!IF(isAdmin == 'Yes','display:none','display:block')}">
+            <c:Plexus_Footer > </c:Plexus_Footer>
+        </div>
+    </div>
+    </div>
+</apex:page> -->
+</apex:page>

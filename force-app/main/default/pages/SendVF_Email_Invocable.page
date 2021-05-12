@@ -1,0 +1,29 @@
+<apex:page controller="SendVF_Email_InvocableMethod">
+
+    <apex:messages />
+
+    <apex:pageBlock title="Send an Email to Your {!account.name} Representatives">
+
+        <p>Fill out the fields below to test how you might send an email to a user.</p>
+
+<apex:dataTable value="{!account.Contacts}" var="contact" border="1">
+
+            <apex:column >
+
+                <apex:facet name="header">Name</apex:facet>
+
+                {!contact.Name}
+
+            </apex:column>
+
+            <apex:column >
+
+                <apex:facet name="header">Email</apex:facet>
+
+                {!contact.Email}
+
+            </apex:column>
+
+        </apex:dataTable>
+</apex:pageBlock>
+</apex:page>

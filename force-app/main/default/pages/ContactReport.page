@@ -1,0 +1,4 @@
+<apex:page standardController="Account" renderAs="pdf">
+  Welcome to This page.
+  {!Account.Id} - {!Account.Name}
+</apex:page>

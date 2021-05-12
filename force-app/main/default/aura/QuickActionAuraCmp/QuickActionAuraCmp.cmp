@@ -1,0 +1,6 @@
+<aura:component implements="flexipage:availableForAllPageTypes,force:lightningQuickAction,force:hasRecordId" 
+                access="global">
+    <lightning:navigation aura:id="navService"/>
+	<c:quickAction onfilterchange="{!c.navigateCmp}"/>
+    <!--<c:contactEditScreen onfilterchange="{!c.eventcall}"/>-->
+</aura:component>

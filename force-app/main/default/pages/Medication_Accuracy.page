@@ -1,0 +1,2399 @@
+<apex:page >
+  <!-- <apex:page Controller="Plexus_MedicationAccuracyCtrlPhase2"  tabStyle="Plexus_Patients__tab" action="{!init}" sidebar="false" showHeader="{!IF(isAdmin == 'Yes',true,false)}" standardStylesheets="true" docType="html-5.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css"/>
+        <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+    
+    <style>
+        .bPageBlock {
+             border-top: 3px solid #1797c0 !important;
+        }
+         label {
+       
+        font-weight: normal;
+    }
+    legend.scheduler-border {
+    width:inherit; /* Or auto */
+    padding:0 10px; /* To give a bit of padding on the left and right */
+    border-bottom:none;
+}
+
+    .radios > span{
+        white-space: nowrap;
+    }
+    th {
+        background-color: #00BFFF;
+        color: white;
+    }
+    
+    .form-style-2-heading{
+        font-weight: bold;
+        font-style: italic;
+        border-bottom: 2px solid #ddd;
+        margin-bottom: 5px;
+        margin-top: 15px;
+        font-size: 15px;
+        padding-bottom: 3px;
+    }
+    
+    .ng-modal-dialog {
+      /* A centered div above the overlay with a box shadow. */
+      z-index:10000;
+      position: absolute;
+      width: 50%; /* Default */
+    
+      /* Center the dialog */
+      top:300px;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      -webkit-transform: translate(-50%, -50%);
+      -moz-transform: translate(-50%, -50%);
+    
+      background-color: #fff;
+      box-shadow: 4px 4px 80px #000;
+    }
+    
+    .ng-modal-overlay {
+          /* A dark translucent div that covers the whole screen */
+          position:fixed;
+          z-index:9999;
+          top:0;
+          left:0;
+          width:100%;
+          height:100%;
+          background-color:#000000;
+          opacity: 0.8;
+        }
+        .ng-modal-overlaytemp {
+          /* A dark translucent div that covers the whole screen */
+          position:fixed;
+          z-index:10001;
+          top:0;
+          left:0;
+          width:100%;
+          height:100%;
+          background-color:#000000;
+          opacity: 0.8;
+        }
+        .ng-modal-dialog {
+          /* A centered div above the overlay with a box shadow. */
+          z-index:10000;
+          position: absolute;
+          width: 50%; /* Default */
+        
+          /* Center the dialog */
+          top:300px;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          -webkit-transform: translate(-50%, -50%);
+          -moz-transform: translate(-50%, -50%);
+        
+          background-color: #fff;
+          box-shadow: 4px 4px 80px #000;
+        }
+        
+        .ng-modal-dialogtemp {
+          /* A centered div above the overlay with a box shadow. */
+          z-index:10002;
+          position: absolute;
+          width: 50%; /* Default */
+        
+          /* Center the dialog */
+          top:300px;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          -webkit-transform: translate(-50%, -50%);
+          -moz-transform: translate(-50%, -50%);
+        
+          background-color: #fff;
+          box-shadow: 4px 4px 80px #000;
+        }
+    
+    .ng-modal-dialog-content {
+      padding:10px;
+      text-align: left;
+    }
+    .ng-modal-close {
+      position: absolute;
+      top: 3px;
+      right: 5px;
+      padding: 5px;
+      cursor: pointer;
+      font-size: 120%;
+      display: inline-block;
+      font-weight: bold;
+      font-family: 'arial', 'sans-serif';
+    }
+    
+    @keyframes anim {
+      0% { background-position: 0 0; }
+      100% { background-position: 50px 50px; }
+    }    
+
+    .bar {
+        position: absolute;
+        margin: auto;
+        top: 0; bottom: 0; left: 0; right: 0;
+        width: 200px;
+        height: 30px;
+        overflow: hidden;
+        background-size:100px 100px;
+        background-image: linear-gradient(-45deg,
+        #33c9ff 25%, #00b2f2 25%, 
+        #00b2f2 50%, #33c9ff 50%,
+        #33c9ff 75%, #00b2f2 75%);
+        animation: anim 1s linear infinite;
+    }
+    
+    .bar p {
+      width: 100px;
+      margin: 6px auto;
+      text-align: center;
+      color: white;
+    }
+    
+    .req {font-size: 150%; color:red} 
+    
+    .ui-autocomplete { 
+        cursor:pointer; 
+        position:fixed;
+        height:250px; 
+        overflow-y:scroll;
+        overflow-x: hidden;
+        z-index:2147483647;
+    }   
+    
+    .pageBlockSection {
+            background-color: #AED6F1;
+            padding-left: 3px;
+            /* vertical-align: middle !important; */
+            font-weight: bold;
+            color: white;
+            /* align-content: center; */
+            padding:6px;
+        }
+        
+        #container1 {
+            display: block; 
+            position:relative
+        } 
+        
+        #container2 {
+            display: block; 
+            position:relative
+        }
+    
+    
+    </style>
+    <script>
+        function setFocusOnLoad() {}
+        
+        $(document).ready(function() {
+            
+            $("#treatmentStartdate").datepicker({
+                onSelect: function(dateText) {
+                            onStartDateSelect(this.value,'Treatment');
+                         }
+            });
+            
+            $("#treatmentStartdatem").datepicker({
+                onSelect: function(dateText) {
+                            onStartDateSelect(this.value,'Treatment');
+                         }
+            });
+            $("#trtmntStopDate").datepicker({
+                onSelect: function(dateText) {
+                            onStopDateSelect(this.value,'Treatment');
+                         }
+            });
+            
+            
+            $("#startDate").datepicker({
+                onSelect: function(dateText) {
+                            onStartDateSelect(this.value,'Antibiotic');
+                         }
+            });
+            $("#stopDate").datepicker({
+                onSelect: function(dateText) {
+                            onStopDateSelect(this.value,'Antibiotic'); 
+                         }
+            });
+            
+             setTimeout(function(){
+                localStorage.setItem("activeMenu", 0);
+                if('{!isPatient}' == 'Yes'){
+                    localStorage.setItem("activeMenu",1);
+                }
+                $(".navigation-bar li a").removeClass('active');
+                $($(".navigation-bar li a")[localStorage.getItem("activeMenu")]).addClass('active');
+             },0)            
+         });
+         
+         
+         
+         function BindControls(val,type) {
+            if(type == 'Medication'){
+                var medis = val;
+        
+                $('#trtMedications').autocomplete({
+                    select: function(event, ui) {
+                        onMediSelect(ui.item.value,'Medication');
+                     },
+                    source: medis,
+                    minLength: 0,
+                    scroll: true,
+                    appendTo: "#container1",
+                }).focus(function() {
+                    $(this).autocomplete("search", $(this).val());
+                });
+             }
+             else if(type == 'Antibiotic'){
+                 var medis = val;
+                 $('#trtAntibiotics').autocomplete({
+                    select: function(event, ui) {
+                        onMediSelect(ui.item.value,'Antibiotic');
+                     },
+                    source: medis,
+                    minLength: 0,
+                    scroll: true,
+                    appendTo: "#container2",
+                }).focus(function() {
+                    $(this).autocomplete("search", $(this).val());
+                });
+             }
+             else if(type == 'Probiotic'){
+                 var medis = val;
+                 $('#probioticMed').autocomplete({
+                    select: function(event, ui) {
+                        onMediSelect(ui.item.value,'Probiotic');
+                     },
+                    source: medis,
+                    minLength: 0,
+                    scroll: true,
+                }).focus(function() {
+                    $(this).autocomplete("search", $(this).val());
+                });
+             }
+        }
+        
+        function onMediSelect(val,type) {
+            angular.element(document.getElementById('agapp')).scope().MediSelect(val,type);  
+        }
+        
+        function onStopDateSelect(val,type){
+            angular.element(document.getElementById('agapp')).scope().StopDateSelect(val,type); 
+        }
+        
+        function onStartDateSelect(val,type){
+            angular.element(document.getElementById('agapp')).scope().StartDateSelect(val,type); 
+        }
+        
+        
+        
+        
+        Visualforce.remoting.timeout = 120000; // Set timeout at page level
+        var app = angular.module('MyApp', []);
+
+        app.directive('modalDialog', function() {
+          return {
+            restrict: 'E',
+            scope: {
+              show: '='
+            },
+            replace: true, // Replace with the template below
+            transclude: true, // we want to insert custom content inside the directive
+            link: function(scope, element, attrs) {
+              scope.dialogStyle = {};
+              if(attrs.width)
+                scope.dialogStyle.width = attrs.width;
+              if(attrs.height)
+                scope.dialogStyle.height = attrs.height;
+              scope.hideModal = function() {
+                scope.show = false;
+              };
+            },
+           template: function(tElement, tAttrs) {
+                if(tAttrs.type == 'Loading'){
+                return "<div class='ng-modal' ng-show='show'><div class='ng-modal-overlaytemp'></div><div class='ng-modal-dialogtemp' ng-style='dialogStyle'><div ng-transclude></div></div></div>";
+                }
+                else if(type = 'newWindow'){
+                return "<div class='ng-modal' ng-show='show'><div class='ng-modal-overlay''></div><div class='ng-modal-dialog' ng-style='dialogStyle'><div class='ng-modal-close' ng-click='hideModal()'>X</div><div class='ng-modal-dialog-content' ng-transclude></div></div></div>";
+                }
+                else if(type = 'antibioticWindow'){
+                return "<div class='ng-modal' ng-show='show'><div class='ng-modal-overlay''></div><div class='ng-modal-dialog' ng-style='dialogStyle'><div class='ng-modal-close' ng-click='hideModal()'>X</div><div class='ng-modal-dialog-content' ng-transclude></div></div></div>";
+                }
+                else if(type = 'probioticWindow'){
+                return "<div class='ng-modal' ng-show='show'><div class='ng-modal-overlay''></div><div class='ng-modal-dialog' ng-style='dialogStyle'><div class='ng-modal-close' ng-click='hideModal()'>X</div><div class='ng-modal-dialog-content' ng-transclude></div></div></div>";
+                }
+             } 
+          };
+        });
+ 
+        app.controller('MedicationAccuracyController' ,['$scope',function($scope){
+            $scope.modalShownWindow = false;
+            $scope.userForm = {};
+            $scope.treatmentForm = {};
+            $scope.antibioticForm = {};
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            $scope.medications;
+            $scope.antibiotics;
+            $scope.probiotics;
+            
+            $scope.treatmentRecords = [];
+            $scope.antibioticRecords = [];
+            $scope.questionObj = [];
+            
+            $scope.questionList;
+            $scope.reasonStoppedValues;
+            $scope.routeAdminValues;
+            
+            $scope.probiotic = {};
+            $scope.probioticRecords = [];
+            
+            $scope.index;
+            $scope.indexAnti;
+            $scope.indexPro;
+            $scope.formType;
+            
+            $scope.isPatient = '{!isPatient}';
+            
+            $scope.delTrtList = [];
+            $scope.delAntiList = [];
+            $scope.delProList = [];
+
+            /*Method to load default values on page load*/
+            /*PageInit Start*/
+            $scope.pageInit = function() {    
+                $scope.modalShown = true;  
+                Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.Plexus_MedicationAccuracyCtrlPhase2.getInitInformation}','{!patientId}','{!recordId}','{!isNew}','{!psspId}',
+                    function(result, event) {  
+                        if(event.status) {    
+                            $scope.medications = result.mediList;
+                            $scope.antibiotics = result.antiList;
+                            $scope.questionList = result.questList;
+                            $scope.probiotics = result.proList;
+                            $scope.probiotic.Medication = 'Select';
+                            $scope.routeAdminValues = result.routeAdminValList;
+                            $scope.reasonStoppedValues = result.RreasonStoppedValues;
+                            if('{!recordId}' != null && '{!recordId}' != '' && '{!isNew}' != 'Yes'){
+                                $scope.userForm.pFirstname = result.pp.First_Name__c;
+                                $scope.userForm.physicianId = result.pp.CreatedById;
+                                $scope.userForm.physician = result.pp.CreatedBy.Name; 
+                                $scope.userForm.pLastname = result.pp.Last_Name__c;
+                                $scope.userForm.pDOB = result.pp.Date_of_Birth__c;
+                                $scope.userForm.siteId = result.siteId;
+                                $scope.userForm.studyId = result.studyId;
+                                $scope.userForm.patientId = result.pp.Patient_ID__c;
+                                $scope.userForm.pid = result.pp.Name;
+                                $scope.userForm.PreferredName = result.pp.Preferred_Name__c;
+                                $scope.userForm.gender = result.pp.Gender__c;
+                                
+                                $scope.userForm.dateFormSubmt = result.pma.Form_Submitted_Date__c;
+                                
+                                if(result.pma.Form_Submitted_Date__c != null){
+                                    var dflate = new Date(result.pma.Form_Submitted_Date__c);
+                                    $scope.userForm.dateFormSubmt = getFormattedDate(dflate);
+                                }
+                                else{
+                                    $scope.userForm.dateFormSubmt = null;
+                                }
+                                
+                                $scope.userForm.Id = '{!recordId}';
+                                $scope.userForm.formStatus = result.pma.Form_Status__c;
+                                if(result.pma.LastModifiedBy.User_First_Name__c != null && result.pma.LastModifiedBy.User_First_Name__c != ''){
+                                    $scope.userForm.submittedBy = result.pma.LastModifiedBy.User_First_Name__c +' '+result.pma.LastModifiedBy.User_Last_Name__c;
+                                }
+                                else{
+                                    $scope.userForm.submittedBy = result.pma.LastModifiedBy.Name;
+                                }
+                                $scope.treatmentRecords = result.treatmentList;
+                                $scope.antibioticRecords = result.antibioticList;
+                                $scope.probioticRecords = result.probioticList;
+    
+                                $scope.questionObjMap = result.quesWrapperMap;
+                                
+                                for(var i=0; i<$scope.questionList.length;i++){
+                                    if($scope.questionObjMap != null && $scope.questionObjMap.hasOwnProperty($scope.questionList[i])){
+                                        $scope.questionObj.push(
+                                            {"question":$scope.questionList[i],
+                                              "Id":$scope.questionObjMap[$scope.questionList[i]].Id,
+                                              "resp":$scope.questionObjMap[$scope.questionList[i]].resp});    
+                                    }
+                                    else{
+                                    $scope.questionObj.push({"question":$scope.questionList[i],"Id":"","resp":null});
+                                    }
+                                } 
+                             }
+                             else{
+                                $scope.userForm.pFirstname = result.pp.First_Name__c;
+                                $scope.userForm.physicianId = result.pp.CreatedById;
+                                $scope.userForm.physician = result.pp.CreatedBy.Name;
+                                $scope.userForm.pLastname = result.pp.Last_Name__c;
+                                $scope.userForm.pDOB = result.pp.Date_of_Birth__c;
+                                $scope.userForm.siteId = result.siteId;
+                                $scope.userForm.studyId = result.studyId;
+                                $scope.userForm.patientId = result.pp.Patient_ID__c;
+                                $scope.userForm.condition = result.pp.Condition__c;
+                                $scope.userForm.Id = ""; 
+                                $scope.userForm.formStatus = "";
+                                $scope.userForm.pid = result.pp.Name;
+                                $scope.userForm.PreferredName = result.pp.Preferred_Name__c;
+                                $scope.userForm.gender = result.pp.Gender__c;
+                                
+                                if(result.pma != null){
+                                    //$scope.questionObj = result.quesWrapper;
+                                    $scope.treatmentRecords = result.treatmentList;
+                                    $scope.antibioticRecords = result.antibioticList;
+                                    $scope.probioticRecords = result.probioticList;
+                                    
+                                    $scope.questionObjMap = result.quesWrapperMap;
+                                    
+                                    for(var i=0; i<$scope.questionList.length;i++){
+                                        if($scope.questionObjMap != null && $scope.questionObjMap.hasOwnProperty($scope.questionList[i])){
+                                            $scope.questionObj.push(
+                                                {"question":$scope.questionList[i],
+                                                  "Id":"",
+                                                  "resp":$scope.questionObjMap[$scope.questionList[i]].resp});    
+                                        }
+                                        else{
+                                        $scope.questionObj.push({"question":$scope.questionList[i],"Id":"","resp":null});
+                                        }
+                                    }     
+                                }
+                                else{
+                                    for(var i=0; i<$scope.questionList.length;i++){
+                                        $scope.questionObj.push({"question":$scope.questionList[i],"Id":"","resp":null});
+                                    } 
+                                }  
+                             }
+                            BindControls($scope.probiotics,'Probiotic');
+                            $scope.modalShown = false;      
+                        }
+                        else{
+                            $scope.modalShown = false;
+                            alert(event.message);
+                        }  
+                        $scope.createDuplicates();
+                        $scope.$apply();
+                    },{escape: false}
+                );
+            }
+            
+            $scope.createDuplicates = function(){
+                $scope.treatmentRecordsTemp = angular.copy($scope.treatmentRecords);
+                $scope.antibioticRecordsTemp = angular.copy($scope.antibioticRecords);
+                $scope.questionObjTemp = angular.copy($scope.questionObj);
+                $scope.probioticRecordsTemp = angular.copy($scope.probioticRecords);
+            }
+            
+            var doc = document.documentElement;
+            var left = 0;
+            var top = 0;
+            
+            $scope.getScrollPosition = function() {
+                left = (window.pageXOffset || doc.scrollLeft) - (doc.clientLeft || 0);
+                top = (window.pageYOffset || doc.scrollTop)  - (doc.clientTop || 0);
+            }
+       
+            $scope.MediSelect = function(val,type){
+                if(type == 'Medication'){
+                $scope.treatmentForm.Medication = val;
+                }
+                else if(type == 'Antibiotic'){
+                    $scope.antibioticForm.Medication = val;
+                }
+                else if(type == 'Probiotic'){
+                    
+                }
+                $scope.$apply();
+            }
+            
+            $scope.StopDateSelect = function(val,type){
+                if(type == 'Treatment'){
+                    $scope.treatmentForm.StopDate = val;
+                }
+                else if(type == 'Antibiotic'){
+                    $scope.antibioticForm.StopDate = val;
+                } 
+                $scope.$apply();
+            }
+            $scope.StartDateSelect = function(val,type){
+                if(type == 'Treatment'){
+                    $scope.treatmentForm.NewStartDate = val;
+                }
+                else if(type == 'Antibiotic'){
+                    $scope.antibioticForm.NewStartDate = val;
+                } 
+                $scope.$apply();
+            }
+            
+            $scope.trtMedicationChange = function(){
+                if($scope.treatmentForm.Medication != 'Other'){
+                    $scope.treatmentForm.MedicationOther = null;
+                }
+            }
+            $scope.antiMedicationChange = function(){
+                if($scope.antibioticForm.Medication != 'Other (Antibiotic)'){
+                    $scope.antibioticForm.MedicationOther = null;
+                }
+            }
+             
+            $scope.ResetTreatmentDates = function(){
+                $("#treatmentStartdate").val(null);
+                $("#treatmentStartdatem").val(null);
+                $scope.treatmentForm.NewStartDate = null;
+                $("#trtmntStopDate").val(null);
+                $scope.treatmentForm.StopDate = null;
+            }
+            
+            $scope.ResetAntibioticDates = function(){
+                $("#stopDate").val(null);
+                $("#startDate").val(null);
+                $scope.antibioticForm.NewStartDate = null;
+                $scope.antibioticForm.StopDate = null;
+            }
+
+            $scope.newTreatmentButton = function() {
+                $scope.getScrollPosition();
+                
+                $scope.index = null;
+                $scope.formType = 'New'; 
+                $scope.treatmentForm = {};
+
+                 BindControls($scope.medications,'Medication');
+                $scope.ResetTreatmentDates();
+                
+                $scope.treatmentForm.reasonStopped = 'Select';
+                $scope.treatmentForm.StartDateEstimated = false;
+                $scope.treatmentForm.StopDateEstimated = false;
+                $scope.treatmentForm.ongoing = false;
+                $scope.modalShownWindow = true; 
+                window.scrollTo(0,0);
+            }
+            
+            $scope.treatmentCancelClicked = function(){
+                $scope.index = null;
+                $scope.formType = null;
+                $scope.modalShownWindow = false;
+                window.scrollTo(0,top);
+            }
+
+            $scope.treatmentEditClicked = function(uForm,indx){
+                $scope.getScrollPosition();
+                BindControls($scope.medications,'Medication');
+                $scope.formType = 'Edit';
+
+                $scope.treatmentForm = {};
+                $scope.treatmentForm.Id = uForm.Id;
+                $scope.treatmentForm.Medication = uForm.Medication;
+                $scope.treatmentForm.MedicationOther = uForm.MedicationOther;
+                $scope.treatmentForm.ViewDose = uForm.NewDose;
+                $scope.treatmentForm.ViewUnit = uForm.NewUnit;
+                $scope.treatmentForm.ViewFrequency = uForm.NewFrequency;
+                $scope.treatmentForm.ViewFrequent = uForm.NewFrequent;
+                $scope.treatmentForm.ViewDoseStatus = uForm.DoseStatus;
+                $scope.treatmentForm.ViewFrequencyStatus = uForm.FrequencyStatus;
+                
+                var stdate = new Date(uForm.NewStartDate);
+
+                $scope.treatmentForm.ViewStartDate  = getFormattedLocalDate(stdate);  
+                $scope.treatmentForm.ViewStartDateEstimated = uForm.StartDateEstimated;
+                $scope.treatmentForm.StartDateEstimated = false;
+                
+                $scope.treatmentForm.ongoing = uForm.ongoing;
+                if(uForm.ongoing == false){
+                    var stdate = new Date(uForm.StopDate);
+                    $scope.treatmentForm.StopDate = getFormattedLocalDate(stdate);
+                    $scope.treatmentForm.StopDateEstimated = uForm.StopDateEstimated;
+                    $scope.treatmentForm.reasonStopped = uForm.reasonStopped;
+                    $scope.treatmentForm.rsComments = uForm.rsComments;
+                }
+                else{
+                    $scope.treatmentForm.StopDate = null;
+                    $scope.treatmentForm.StopDateEstimated = false;   
+                    $scope.treatmentForm.reasonStopped = 'Select';
+                    $scope.treatmentForm.rsComments = null;
+                }
+
+                $scope.index = indx;
+                $scope.modalShownWindow = true; 
+                window.scrollTo(0,0); 
+            }
+            
+            $scope.setTreatmetnJqueryTongModel = function(){
+                if($scope.formType == 'New'){
+                    $scope.treatmentForm.NewStartDate = $("#treatmentStartdate").val();
+                }
+                else if($scope.formType == 'Edit'){
+                    $scope.treatmentForm.NewStartDate = $("#treatmentStartdatem").val();
+                }
+                
+                $scope.treatmentForm.StopDate = $("#trtmntStopDate").val();
+            }
+            
+            $scope.treatmentSaveClicked = function(){ 
+                $scope.setTreatmetnJqueryTongModel($scope.formType);
+                var startTocompareStop;
+                
+                if($scope.treatmentForm.Medication == null || $scope.treatmentForm.Medication == ''){
+                    alert("Please provide the required field(s) to continue.")
+                    return;        
+                }
+                
+                if($scope.treatmentForm.Medication == 'Other' && 
+                             ($scope.treatmentForm.MedicationOther == null || $scope.treatmentForm.MedicationOther == '')){
+                    alert("Please provide the required field(s) to continue.")
+                    return;       
+                }
+                    
+                
+                if($scope.formType == 'New'){
+                    if($scope.treatmentForm.NewDose == null || $scope.treatmentForm.NewDose == '' 
+                            || $scope.treatmentForm.NewUnit == null || $scope.treatmentForm.NewFrequency == null 
+                            || $scope.treatmentForm.NewStartDate == null || $scope.treatmentForm.NewStartDate == '' 
+                            || (($scope.treatmentForm.StopDate == null || $scope.treatmentForm.StopDate == '') 
+                            && $scope.treatmentForm.ongoing == false)){
+                            
+                         alert("Please provide the required field(s) to continue.")
+                         return;              
+                     }   
+                    
+                    if(!isValidCurrency($scope.treatmentForm.NewDose)){
+                        alert("Please provide a valid 'Dose' (maximum of 5 digits and 2 decimal places).");
+                        return;
+                    }
+                    if($scope.treatmentForm.NewFrequency == 'Other' && 
+                             ($scope.treatmentForm.NewFrequent == null || $scope.treatmentForm.NewFrequent == '')){
+                        alert("Frequency has been selected as 'Other', please provide the other information.");
+                        return;
+                    } 
+
+                    if($scope.treatmentForm.NewFrequency == 'Other' && $scope.treatmentForm.NewFrequent != null 
+                                && $scope.treatmentForm.NewFrequent != ''){
+                        if( $scope.treatmentForm.NewFrequent.charAt(0) == '0'){
+                            alert("Frequency has been selected as 'Other', please provide the valid value for other information.");
+                            return;
+                        }
+                    }
+                     
+                    if(!isValidDate($scope.treatmentForm.NewStartDate)){
+                       alert("Please select the valid 'Start Date'");
+                       return;
+                    }
+                    var startdate = new Date($scope.treatmentForm.NewStartDate);
+                    if(startdate > today){
+                        alert("Medication 'Start Date' cannot be a future date.");
+                        return;  
+                    }
+                    var dob = new Date($scope.userForm.pDOB);
+                    if(dob >= startdate){
+                        alert("Medication 'Start Date' should be greater than the 'Date of Birth'.");
+                        return false;
+                    }  
+                    startTocompareStop = new Date($scope.treatmentForm.NewStartDate);     
+                }
+                else if($scope.formType == 'Edit'){
+                
+                    if($scope.treatmentForm.DoseStatus == null || $scope.treatmentForm.FrequencyStatus == null 
+                                    || $scope.treatmentForm.MedicationDateStatus  == null){
+                        alert("Please provide the required field(s) to continue.")
+                        return;
+                    }
+                    
+                    
+                    
+                    if($scope.treatmentForm.DoseStatus == 'Dose is wrong' && ($scope.treatmentForm.NewDose == null 
+                            || $scope.treatmentForm.NewDose == '' || $scope.treatmentForm.NewUnit == null)) {
+                        alert("Dose is marked as 'Wrong'. Please provide the current Dose and Unit information.");
+                        return;        
+                    }
+                    
+                    if($scope.treatmentForm.DoseStatus == 'Dose is wrong' && !isValidCurrency($scope.treatmentForm.NewDose)){
+                        alert("Please provide a valid 'Dose' (maximum of 5 digits and 2 decimal places).");
+                        return;
+                    }
+
+                    
+                    if($scope.treatmentForm.FrequencyStatus == 'Frequency is wrong' && $scope.treatmentForm.NewFrequency == null){
+                        alert("Frequency is marked as 'Wrong', please provide current Frequency information.");
+                        return;    
+                    }
+                    if($scope.treatmentForm.NewFrequency == 'Other' && 
+                                 ($scope.treatmentForm.NewFrequent == null || $scope.treatmentForm.NewFrequent == '')){
+                         alert("Frequency has been selected as 'Other', please provide the other information.");
+                         return;
+                    }  
+                    
+                    if($scope.treatmentForm.NewFrequency == 'Other' && $scope.treatmentForm.NewFrequent != null 
+                                && $scope.treatmentForm.NewFrequent != ''){
+                        if( $scope.treatmentForm.NewFrequent.charAt(0) == '0'){
+                            alert("Frequency has been selected as 'Other', please provide the valid value for other information.");
+                            return;
+                        }
+                    }
+                    
+                    if($scope.treatmentForm.MedicationDateStatus == 'Date is wrong') {
+                        if($scope.treatmentForm.NewStartDate == null || $scope.treatmentForm.NewStartDate == ''){
+                            alert("Date is marked as 'Wrong', please provide the correct date information.");
+                            return;
+                        }
+                        
+                        if(!isValidDate($scope.treatmentForm.NewStartDate)){
+                            alert("Please select the valid 'Start date'");
+                            return;
+                        }
+                        var startdate = new Date($scope.treatmentForm.NewStartDate);
+                        if(startdate > today){
+                            alert("Medication 'Start Date' cannot be a future date.");
+                            return;  
+                        }
+                        var dob = new Date($scope.userForm.pDOB);
+                        if(dob >= startdate){
+                            alert("Medication 'Start Date' should be greater than the 'Date of Birth'.");
+                            return false;
+                        }
+                        
+                        startTocompareStop = new Date($scope.treatmentForm.NewStartDate);
+                    }
+                    else{
+                        startTocompareStop = new Date($scope.treatmentForm.ViewStartDate);
+                    }
+                }
+                
+                if($scope.medications.indexOf(myTrim($scope.treatmentForm.Medication)) === -1){
+                    alert("Invalid Medication Name. Please select a value for the Medication Name.");
+                    return;
+                } 
+
+                if($scope.treatmentForm.ongoing == false){
+                    var stopdate = new Date($scope.treatmentForm.StopDate);
+                    if($scope.treatmentForm.StopDate == null || $scope.treatmentForm.StopDate == '' 
+                            || $scope.treatmentForm.reasonStopped == null || $scope.treatmentForm.reasonStopped == '' 
+                            || $scope.treatmentForm.reasonStopped == 'Select'){
+                        alert("Please provide the required field(s) to continue.");
+                        return;
+                    }
+                    if($scope.treatmentForm.reasonStopped == 'Other' && 
+                                ($scope.treatmentForm.rsComments == null || $scope.treatmentForm.rsComments == '')){
+                        alert("Please provide the required field(s) to continue.");
+                        return;
+                    }
+                    if(!isValidDate($scope.treatmentForm.StopDate)){
+                        alert("Please select a valid 'Stop Date'");
+                        return;
+                    }
+                    if(stopdate > today){
+                        alert("Medication 'Stop Date' cannot be a future date.");
+                        return;  
+                    }
+                    var dob = new Date($scope.userForm.pDOB);
+                    if(dob >= stopdate){
+                        alert("Medication 'Stop Date' should be greater than the 'Date of Birth'.");
+                        return false;
+                    }
+                    if(stopdate < startTocompareStop){
+                        alert("Medication 'Stop Date' cannot be earlier than the 'Start Date'.");
+                        return;  
+                    }
+                }  
+                
+                var isDup = false;
+                for(var i=0; i<$scope.treatmentRecords.length; i++){   
+                    if($scope.index != i){
+                        if($scope.treatmentForm.Medication == 'Other'){
+                            if($scope.treatmentRecords[i].MedicationOther != null && $scope.treatmentRecords[i].MedicationOther != ''){
+                                if($scope.treatmentRecords[i].MedicationOther.toUpperCase() 
+                                                            == $scope.treatmentForm.MedicationOther.toUpperCase()){
+                                    isDup = true;
+                                    break;
+                                }
+                            }
+                        }
+                        else {
+                            if($scope.treatmentRecords[i].Medication == $scope.treatmentForm.Medication){
+                                isDup = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                if(isDup == true){
+                    var r = confirm("Medication type exists already, do you want to continue? \nIf yes, Press 'Ok' to continue.");
+                    if (r == true) {
+                         $scope.assginTreatment();   
+                    }
+                    else{
+                        return;
+                    }
+                }
+                else {
+                    $scope.assginTreatment();
+                }
+            }
+            
+            $scope.assginTreatment = function(){
+                $scope.tempTreatmentForm = {};
+                
+                $scope.tempTreatmentForm.Medication = $scope.treatmentForm.Medication;
+                $scope.tempTreatmentForm.MedicationOther = $scope.treatmentForm.MedicationOther;
+                $scope.tempTreatmentForm.StopDate = $scope.treatmentForm.StopDate;
+                $scope.tempTreatmentForm.ongoing = $scope.treatmentForm.ongoing; 
+                $scope.tempTreatmentForm.StopDateEstimated = $scope.treatmentForm.StopDateEstimated;
+                $scope.tempTreatmentForm.reasonStopped = $scope.treatmentForm.reasonStopped ;
+                $scope.tempTreatmentForm.rsComments = $scope.treatmentForm.rsComments;
+                
+                if($scope.formType == 'New'){
+                    $scope.tempTreatmentForm.Id = null;  
+                    $scope.tempTreatmentForm.NewDose = $scope.treatmentForm.NewDose;
+                    $scope.tempTreatmentForm.NewUnit = $scope.treatmentForm.NewUnit;
+                    $scope.tempTreatmentForm.NewFrequency = $scope.treatmentForm.NewFrequency;
+                    $scope.tempTreatmentForm.NewFrequent = $scope.treatmentForm.NewFrequent;
+                    $scope.tempTreatmentForm.NewStartDate = $scope.treatmentForm.NewStartDate; 
+                    $scope.tempTreatmentForm.StartDateEstimated = $scope.treatmentForm.StartDateEstimated;            
+                }
+                else if($scope.formType == 'Edit'){  
+                    $scope.tempTreatmentForm.Id = $scope.treatmentForm.Id;
+                    $scope.tempTreatmentForm.DoseStatus = $scope.treatmentForm.DoseStatus; 
+                    $scope.tempTreatmentForm.FrequencyStatus = $scope.treatmentForm.FrequencyStatus;
+                    $scope.tempTreatmentForm.MedicationDateStatus = $scope.treatmentForm.MedicationDateStatus;
+                    
+                    if($scope.treatmentForm.DoseStatus == 'Dose is correct'){
+                        if($scope.treatmentForm.ViewDoseStatus == 'Unknown'){
+                            $scope.tempTreatmentForm.DoseStatus = $scope.treatmentForm.ViewDoseStatus; 
+                        }
+                        else{
+                            $scope.tempTreatmentForm.NewDose = $scope.treatmentForm.ViewDose;
+                            $scope.tempTreatmentForm.NewUnit = $scope.treatmentForm.ViewUnit;
+                        }
+                    }
+                    else if($scope.treatmentForm.DoseStatus == 'Dose is wrong'){
+                        $scope.tempTreatmentForm.NewDose = $scope.treatmentForm.NewDose;
+                        $scope.tempTreatmentForm.NewUnit = $scope.treatmentForm.NewUnit;
+                        
+                    }
+                    else if($scope.treatmentForm.DoseStatus == 'Unknown'){
+                        $scope.tempTreatmentForm.NewDose = null;
+                        $scope.tempTreatmentForm.NewUnit = null;
+                    } 
+                    
+                    if($scope.treatmentForm.FrequencyStatus == 'Frequency is correct'){ 
+                        if($scope.treatmentForm.ViewFrequencyStatus == 'Unknown'){
+                            $scope.tempTreatmentForm.FrequencyStatus = $scope.treatmentForm.ViewFrequencyStatus;
+                        }
+                        else{
+                            $scope.tempTreatmentForm.NewFrequency = $scope.treatmentForm.ViewFrequency;
+                            $scope.tempTreatmentForm.NewFrequent = $scope.treatmentForm.ViewFrequent;
+                        }
+                    }
+                    else if($scope.treatmentForm.FrequencyStatus == 'Frequency is wrong'){
+                        $scope.tempTreatmentForm.NewFrequency = $scope.treatmentForm.NewFrequency;
+                        $scope.tempTreatmentForm.NewFrequent = $scope.treatmentForm.NewFrequent;
+                    }
+                    else if($scope.treatmentForm.FrequencyStatus == 'Unknown'){
+                        $scope.tempTreatmentForm.NewFrequency = null;
+                        $scope.tempTreatmentForm.NewFrequent = null;
+                    }
+                    
+                    if($scope.treatmentForm.MedicationDateStatus == 'Date is correct'){
+                        $scope.tempTreatmentForm.NewStartDate = $scope.treatmentForm.ViewStartDate;
+                        $scope.tempTreatmentForm.StartDateEstimated = $scope.treatmentForm.ViewStartDateEstimated; 
+                    }
+                    else if($scope.treatmentForm.MedicationDateStatus == 'Date is wrong'){
+                        $scope.tempTreatmentForm.NewStartDate = $scope.treatmentForm.NewStartDate;
+                        $scope.tempTreatmentForm.StartDateEstimated = $scope.treatmentForm.StartDateEstimated; 
+                    }
+                }
+                
+                if($scope.index == null){
+                    $scope.treatmentRecords.push($scope.tempTreatmentForm);
+                }
+                else{
+                    $scope.treatmentRecords[$scope.index] = $scope.tempTreatmentForm;
+                    $scope.index = null;
+                }
+                $scope.formType = null;
+                window.scrollTo(0,top);
+                $scope.modalShown = false;
+                $scope.modalShownWindow = false;
+            }
+            
+            $scope.newAntibioticTreatmentButton = function() {
+                $scope.getScrollPosition();
+
+                $scope.indexAnti = null;
+                $scope.formType = 'antiNew'; 
+                $scope.antibioticForm = {};
+                BindControls($scope.antibiotics,'Antibiotic');
+                $scope.ResetAntibioticDates();
+                 
+                $scope.modalShownAntiWindow = true;
+                
+                $scope.antibioticForm.reasonStopped = 'Select';
+                $scope.antibioticForm.StartDateEstimated = false;
+                $scope.antibioticForm.StopDateEstimated = false;
+                $scope.antibioticForm.routeOfAdmin = 'Select'; 
+                $scope.antibioticForm.doseUnknown = false;
+                $scope.antibioticForm.ongoing = false;
+                window.scrollTo(0,0);
+            }
+            
+            $scope.antibioticCancelClicked = function(){
+                $scope.indexAnti = null;
+                $scope.formType = null;
+                $scope.modalShownAntiWindow = false;
+                window.scrollTo(0,top);
+            }
+            
+            $scope.antibioticEditClicked = function(uForm,indx){
+                $scope.getScrollPosition();
+                BindControls($scope.antibiotics,'Antibiotic');
+            
+                $scope.formType = 'antiEdit';
+                $scope.antibioticForm  = angular.copy(uForm);
+                if(uForm.doseUnknown == false){
+                    $scope.antibioticForm.NewDose = uForm.NewDose;
+                }
+                else{
+                    $scope.antibioticForm.NewDose = null;
+                }
+                
+
+                var stdate = new Date(uForm.NewStartDate);
+                $scope.antibioticForm.NewStartDate = getFormattedLocalDate(stdate);
+                $scope.antibioticForm.StartDateEstimated = uForm.StartDateEstimated;
+                $scope.antibioticForm.ongoing = uForm.ongoing;
+                
+                if(uForm.ongoing == false){
+                    var stdate = new Date(uForm.StopDate);
+                    $scope.antibioticForm.StopDate = getFormattedLocalDate(stdate);
+                    $scope.antibioticForm.StopDateEstimated = uForm.StopDateEstimated;
+                    $scope.antibioticForm.reasonStopped = uForm.reasonStopped;
+                    $scope.antibioticForm.rsComments = uForm.rsComments;
+                }
+                else{
+                    $scope.antibioticForm.StopDate = null;
+                    $scope.antibioticForm.StopDateEstimated = false;
+                    $scope.antibioticForm.reasonStopped = 'Select';
+                    $scope.antibioticForm.rsComments = null;
+                }
+                
+                $scope.indexAnti = indx;
+                $scope.modalShownAntiWindow = true;
+                
+                window.scrollTo(0,0);
+            }  
+            
+            $scope.setAntibioticJqueryTongModel = function(){
+                $scope.antibioticForm.NewStartDate = $("#startDate").val();
+                $scope.antibioticForm.StopDate = $("#stopDate").val();
+            }
+            
+            $scope.antibioticSaveClicked = function(){ 
+                $scope.setAntibioticJqueryTongModel();
+                
+                if($scope.antibioticForm.Medication == null || $scope.antibioticForm.Medication =='' 
+                        || $scope.antibioticForm.routeOfAdmin == null || 
+                        (($scope.antibioticForm.NewDose == null || $scope.antibioticForm.NewDose == ''
+                            || $scope.antibioticForm.NewUnit == null) 
+                        && $scope.antibioticForm.doseUnknown == false)
+                        || $scope.antibioticForm.routeOfAdmin == 'Select' || $scope.antibioticForm.NewFrequency == null 
+                        || $scope.antibioticForm.NewStartDate == null || $scope.antibioticForm.NewStartDate == ''){
+                    alert('Please provide the required field(s) to continue.');
+                    return;
+                }
+                
+                if($scope.antibioticForm.Medication == 'Other (Antibiotic)' && 
+                             ($scope.antibioticForm.MedicationOther == null || $scope.antibioticForm.MedicationOther == '')){
+                     alert("Please provide the required field(s) to continue.")
+                     return;       
+                 }
+                 
+                 if($scope.antibioticForm.doseUnknown == false && !isValidCurrency($scope.antibioticForm.NewDose)){
+                    alert("Please provide a valid 'Dose' (maximum of 5 digits and 2 decimal places).");
+                    return;
+                }
+ 
+                if($scope.antibioticForm.NewFrequency == 'Other' && ($scope.antibioticForm.NewFrequent == null 
+                                || $scope.antibioticForm.NewFrequent == '')){
+                    alert("Frequency has been selected as 'Other', please provide the other information.");
+                    return;
+                }
+                
+                if($scope.antibioticForm.NewFrequency == 'Other' && $scope.antibioticForm.NewFrequent != null 
+                                && $scope.antibioticForm.NewFrequent != ''){
+                    if( $scope.antibioticForm.NewFrequent.charAt(0) == '0'){
+                        alert("Frequency has been selected as 'Other', please provide the valid value for other information.");
+                        return;
+                    }
+                }
+                
+                var startdate = new Date($scope.antibioticForm.NewStartDate);
+
+                if(!isValidDate($scope.antibioticForm.NewStartDate)){
+                    alert("Please select the valid 'Start Date'");
+                    return;
+                }
+                
+                if(startdate >  today){
+                    alert("Medication 'Start Date' cannot be a future date.");
+                    return;  
+                }
+                var dob = new Date($scope.userForm.pDOB);
+                if(dob >= startdate){
+                     alert("Medication 'Start Date' should be greater than the 'Date of Birth'.");
+                     return false;
+                }
+                
+                if($scope.antibioticForm.ongoing == false){
+                    var stopdate = new Date($scope.antibioticForm.StopDate);
+                    if($scope.antibioticForm.StopDate == null || $scope.antibioticForm.StopDate == '' 
+                            || $scope.antibioticForm.reasonStopped == null || $scope.antibioticForm.reasonStopped == '' 
+                            || $scope.antibioticForm.reasonStopped == 'Select'){
+                        alert("Please provide the required field(s) to continue.");
+                        return;
+                    }
+                    if($scope.antibioticForm.reasonStopped == 'Other' && 
+                                ($scope.antibioticForm.rsComments == null || $scope.antibioticForm.rsComments == '')){
+                        alert("Please provide the required field(s) to continue.");
+                        return;
+                    }
+                    
+                    if(!isValidDate($scope.antibioticForm.StopDate)){
+                        alert("Please select the valid 'Stop Date'");
+                        return;
+                    }
+                    if(stopdate >  today){
+                        alert("Medication 'Stop Date' cannot be a future date.");
+                        return;  
+                    }
+                    var dob = new Date($scope.userForm.pDOB);
+                    if(dob >= stopdate){
+                        alert("Medication 'Stop Date' should be greater than the 'Date of Birth'.");
+                        return false;
+                    }
+                    if(stopdate < startdate){
+                        alert("Medication 'Stop Date' cannot be earlier than the 'Start Date'.");
+                        return;  
+                    }
+                }
+                
+                if($scope.antibiotics.indexOf(myTrim($scope.antibioticForm.Medication)) === -1){
+                    alert("Invalid Antibiotic. Please select a value for the Antibiotic.");
+                    return;
+                }
+                
+                var isDup = false;
+                for(var i=0; i<$scope.antibioticRecords.length; i++){   
+                    if($scope.indexAnti != i){
+                        if($scope.antibioticForm.Medication == 'Other (Antibiotic)'){
+                            if($scope.antibioticRecords[i].MedicationOther != null 
+                                                    && $scope.antibioticRecords[i].MedicationOther != ''){
+                                if($scope.antibioticRecords[i].MedicationOther.toUpperCase() 
+                                                    == $scope.antibioticForm.MedicationOther.toUpperCase()){
+                                    isDup = true;
+                                    break;
+                                }
+                            }
+                        }
+                        else{
+                            if($scope.antibioticRecords[i].Medication == $scope.antibioticForm.Medication){
+                                isDup = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                if(isDup  == true){
+                    var r = confirm("Medication type exists already, do you want to continue? \nIf yes, Press 'Ok' to continue.");
+                    if (r == true) {
+                       $scope.assginAntibiotic(); 
+                    }
+                    else{
+                        return;
+                    }
+                }
+                else {
+                    $scope.assginAntibiotic();
+                }
+            }
+            
+            $scope.assginAntibiotic = function(){
+                $scope.tempAntibioticForm = {};
+                $scope.tempAntibioticForm.NewDose = $scope.formatDosageDecimal($scope.antibioticForm.NewDose);
+                $scope.tempAntibioticForm.NewUnit = $scope.antibioticForm.NewUnit;
+                $scope.tempAntibioticForm.Medication = $scope.antibioticForm.Medication;
+                $scope.tempAntibioticForm.MedicationOther = $scope.antibioticForm.MedicationOther;
+                $scope.tempAntibioticForm.doseUnknown = $scope.antibioticForm.doseUnknown;
+                $scope.tempAntibioticForm.routeOfAdmin  = $scope.antibioticForm.routeOfAdmin;
+                $scope.tempAntibioticForm.NewFrequency = $scope.antibioticForm.NewFrequency;
+                $scope.tempAntibioticForm.NewFrequent = $scope.antibioticForm.NewFrequent;
+                $scope.tempAntibioticForm.NewStartDate = $scope.antibioticForm.NewStartDate;
+                $scope.tempAntibioticForm.StartDateEstimated = $scope.antibioticForm.StartDateEstimated;
+                $scope.tempAntibioticForm.StopDate  = $scope.antibioticForm.StopDate; 
+                $scope.tempAntibioticForm.ongoing = $scope.antibioticForm.ongoing; 
+                $scope.tempAntibioticForm.StopDateEstimated = $scope.antibioticForm.StopDateEstimated;
+                $scope.tempAntibioticForm.reasonStopped = $scope.antibioticForm.reasonStopped ;
+                $scope.tempAntibioticForm.rsComments = $scope.antibioticForm.rsComments;
+
+                if($scope.formType == 'antiNew'){  
+                    $scope.tempAntibioticForm.Id = null;              
+                }
+                else{
+                    $scope.tempAntibioticForm.Id = $scope.antibioticForm.Id;
+                }
+                
+                
+                
+                if($scope.tempAntibioticForm.NewDose == null || $scope.tempAntibioticForm.NewDose == undefined){
+                    delete $scope.tempAntibioticForm['NewDose'];
+                }
+                
+                if($scope.tempAntibioticForm.NewUnit == null || $scope.tempAntibioticForm.NewUnit == undefined){
+                    delete $scope.tempAntibioticForm['NewUnit'];
+                }
+                
+                if($scope.tempAntibioticForm.MedicationOther == null || $scope.tempAntibioticForm.MedicationOther == undefined){
+                    delete $scope.tempAntibioticForm['MedicationOther'];
+                }
+                if($scope.tempAntibioticForm.NewFrequent == null || $scope.tempAntibioticForm.NewFrequent == undefined){
+                    delete $scope.tempAntibioticForm['NewFrequent'];
+                }
+                if($scope.tempAntibioticForm.StopDate == null || $scope.tempAntibioticForm.StopDate == ''){
+                    delete $scope.tempAntibioticForm['StopDate'];
+                }
+                if($scope.tempAntibioticForm.rsComments == null || $scope.tempAntibioticForm.rsComments == ''){
+                    delete $scope.tempAntibioticForm['rsComments'];
+                }
+                
+                
+                if($scope.indexAnti == null){
+                    $scope.antibioticRecords.push($scope.tempAntibioticForm);
+                }
+                else{
+                    $scope.antibioticRecords[$scope.indexAnti] = $scope.tempAntibioticForm;
+                    $scope.indexAnti = null;
+                }
+                $scope.formType = null;
+                window.scrollTo(0,top);
+                $scope.modalShown = false;
+                $scope.modalShownAntiWindow = false;
+            }  
+            
+            $scope.NewProbioticTreatmentButton = function(){                
+                $scope.getScrollPosition();
+            
+                $scope.indexPro = null;
+                $scope.formType = 'proNew'; 
+                $scope.probiotic = {};
+                $scope.probiotic.Medication = 'Select';
+                $scope.probiotic.ongoing = null;
+                
+                $scope.probioticWindow = true; 
+                
+                window.scrollTo(0,0);
+            }
+            
+            $scope.proCancelClicked = function(){
+                $scope.indexPro = null;
+                $scope.formType = null;
+                $scope.probioticWindow = false;
+                window.scrollTo(0,top);
+            }
+            
+            $scope.proEditClicked = function(uForm,indx){
+                $scope.getScrollPosition();
+            
+                $scope.formType = 'proEdit';
+                $scope.probiotic = angular.copy(uForm);
+                $scope.indexPro = indx;
+                $scope.probioticWindow = true;
+                window.scrollTo(0,0);
+            }
+            
+            $scope.proSaveClicked = function(){
+                if($scope.probiotic.ongoing == null){
+                    alert("Please select an option for 'Are you still taking it?'");
+                    return;
+                }
+                if($scope.probiotic.Medication == 'Select'){
+                    alert("Please provide the required field(s) to continue.");
+                    return;
+                }
+                if($scope.probiotic.Medication == 'Probiotic - Other' && 
+                            ($scope.probiotic.MedicationOther == null || $scope.probiotic.MedicationOther == '') ){
+                    alert("Please provide the required field(s) to continue.");
+                    return;
+                }
+                
+                for(var i=0; i<$scope.probioticRecords.length; i++){   
+                    if($scope.indexPro != i){
+                        if($scope.probiotic.Medication == 'Probiotic - Other'){
+                            if($scope.probioticRecords[i].MedicationOther != null 
+                                                    && $scope.probioticRecords[i].MedicationOther != ''){
+                                if($scope.probioticRecords[i].MedicationOther.toUpperCase() 
+                                                        == $scope.probiotic.MedicationOther.toUpperCase()){
+                                    alert("Probiotic type exists already. Please re-enter.");
+                                    return;
+                                }
+                            }
+                        }
+                        else{
+                            if($scope.probioticRecords[i].Medication == $scope.probiotic.Medication){
+                                alert("Probiotic type exists already. Please re-enter.");
+                                return;
+                            }
+                        }
+                    }
+                }
+                
+                $scope.tempProbiotic = {};
+                $scope.tempProbiotic.Medication = $scope.probiotic.Medication;
+                $scope.tempProbiotic.MedicationOther = $scope.probiotic.MedicationOther;
+                $scope.tempProbiotic.ongoing = $scope.probiotic.ongoing == 'true' ? true : false;
+                
+                
+                if($scope.formType == 'proNew'){  
+                    $scope.tempProbiotic.Id = null;              
+                }
+                else{
+                    $scope.tempProbiotic.Id = $scope.probiotic.Id;
+                }
+                
+                if($scope.tempProbiotic.MedicationOther == null || $scope.tempProbiotic.MedicationOther == undefined){
+                    delete $scope.tempProbiotic['MedicationOther'];
+                }
+                
+                if($scope.indexPro == null){
+                    $scope.probioticRecords.push($scope.tempProbiotic);
+                }
+                else{
+                    $scope.probioticRecords[$scope.indexPro] = $scope.tempProbiotic;
+                    $scope.indexPro = null;
+                }
+                $scope.formType = null;
+                window.scrollTo(0,top);
+                $scope.modalShown = false;
+                $scope.probioticWindow = false;
+            }   
+            
+            $scope.saveValidationRules = function(){
+
+                if($scope.questionObj[0].resp == null){
+                    alert('Please provide required information for antibiotics.');
+                    return false;
+                }
+                if($scope.questionObj[1].resp == null){
+                    alert('Please provide required information for Probiotics .');
+                    return false;
+                }
+            }   
+            
+            $scope.submitValidationRules = function(){
+                
+                if($scope.questionObj[0].resp == null){
+                    alert('Please provide required information for antibiotics.');
+                    return false;
+                }
+                
+                if($scope.questionObj[0].resp == 'Yes' && $scope.antibioticRecords.length == 0){
+                    alert('Please input at least one antibiotic(s) to continue.');
+                    return false;
+                }
+                
+                if($scope.questionObj[1].resp == null){
+                    alert('Please provide required information for Probiotics .');
+                    return false;
+                }
+                if($scope.questionObj[1].resp == 'Yes' && $scope.probioticRecords.length == 0){
+                    alert('Please input at least one probiotic(s) to continue.');
+                    return false;
+                }
+            }  
+               
+            var saveButtonStatus = false; 
+            $scope.SaveClick = function(){
+                if($scope.compareChanges() == false && ($scope.userForm.Id == null || $scope.userForm.Id == '')){
+                    alert("The form cannot be saved as no change has been done on it.");
+                    return;
+                } 
+                if(saveButtonStatus == true){
+                    return; 
+                }
+                if($scope.saveValidationRules() != false){  
+                    $scope.modalShown = true;
+                    saveButtonStatus = true;
+                    $scope.userForm.formStatus = 'Saved';
+                    Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.Plexus_MedicationAccuracyCtrlPhase2.insertForm}',$scope.userForm,'{!patientId}',$scope.treatmentRecords,$scope.antibioticRecords,$scope.probioticRecords,$scope.questionObj,'{!psspId}',$scope.delTrtList,$scope.delAntiList,$scope.delProList,
+                        function(result, event) {
+                            if(event.status) {
+                                //window.location = "/apex/Plexus_PatientPage?id={!patientId}&mode=View";
+                                window.location = "{!$page.Plexus_MedicationAccuracyViewPhase2}?Id="+result.pma.Id+"&pId={!patientId}&sId={!studySFId}&pssId={!psspId}&formView=View";
+                            }
+                            else{
+                                $scope.userForm.formStatus = null;
+                                $scope.modalShown = false;
+                                alert(event.message);
+                            }
+                            $scope.$apply();
+                           saveButtonStatus = false;
+                        },{escape: false}
+                    );
+                 }
+             }
+             
+             var saveSubButtonStatus = false;
+             $scope.SubmitClick = function(){ 
+                if($scope.compareChanges() == false && ($scope.userForm.Id == null || $scope.userForm.Id == '')){
+                    alert("The form cannot be submitted as no change has been done on it.");
+                    return;
+                } 
+                if(saveSubButtonStatus == true){
+                    return; 
+                } 
+                
+                if($scope.submitValidationRules() != false){
+                    var r = confirm("Once submitted the form cannot be modified. Press 'OK' to submit.");
+                    if (r == true) {
+                        $scope.modalShown = true;
+                        saveSubButtonStatus = true;
+                        $scope.userForm.formStatus = 'Submitted';
+                        Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.Plexus_MedicationAccuracyCtrlPhase2.insertForm}',$scope.userForm,'{!patientId}',$scope.treatmentRecords,$scope.antibioticRecords,$scope.probioticRecords,$scope.questionObj,'{!psspId}',$scope.delTrtList,$scope.delAntiList,$scope.delProList,
+                            function(result, event) {
+                                if(event.status) {
+                                    //window.location = "/apex/Plexus_PatientPage?id={!patientId}&mode=View";
+                                    window.location = "{!$page.Plexus_MedicationAccuracyViewPhase2}?Id="+result.pma.Id+"&pId={!patientId}&sId={!studySFId}&pssId={!psspId}&formView=View";
+                                }
+                                else{
+                                    $scope.userForm.formStatus = null;
+                                    $scope.modalShown = false;
+                                    alert(event.message);
+                                }
+                                $scope.$apply();
+                                saveSubButtonStatus = false;
+                            },{escape: false}
+                        );
+                     } 
+                     else {
+                        return;
+                     } 
+                 }
+             }
+             
+             $scope.compareChanges = function(){
+                 $scope.result1 = angular.equals($scope.treatmentRecords, $scope.treatmentRecordsTemp); 
+                 $scope.result2 = angular.equals($scope.antibioticRecords, $scope.antibioticRecordsTemp); 
+                 $scope.result3 = angular.equals($scope.probioticRecords, $scope.probioticRecordsTemp); 
+                 $scope.result4 = angular.equals($scope.questionObj, $scope.questionObjTemp); 
+                 
+                 if($scope.result1 && $scope.result2 && $scope.result3 && $scope.result4){
+                     return false;
+                 }
+                 else{
+                     return true;
+                 }
+             }
+             
+             $scope.DeleteClick = function(){
+                 var r = confirm("Are you sure, do you want to delete the data.\nPress 'Ok' to continue.");
+                    if (r == true) {
+                        Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.Plexus_MedicationAccuracyCtrlPhase2.deleteRecord}','{!recordId}',
+                            function(result, event) {
+                                if(event.status) {
+                                    window.location = "{!$page.Plexus_PatientPage}?id={!patientId}&sId={!studySFId}&pssId={!psspId}&mode=View";    
+                                }
+                                else{
+                                    $scope.modalShown = false;
+                                    alert(event.message);
+                                }
+                                $scope.$apply();
+                            } 
+                       );
+                    } 
+                    else {
+                        return;
+                    } 
+               }
+             $scope.isOngoingStopDate = function(){    
+                 if($scope.antibioticForm.ongoing){
+                     $("#stopDate").val(null);
+                     $scope.antibioticForm.StopDate = null;
+                     $scope.antibioticForm.StopDateEstimated = false;
+                     $scope.antibioticForm.reasonStopped = 'Select';
+                     $scope.antibioticForm.rsComments = null;
+                 }
+             }  
+             
+             $scope.isTrtmntOngoingStopDate = function(){
+                 if($scope.treatmentForm.ongoing){
+                     $("#trtmntStopDate").val(null);
+                     $scope.treatmentForm.StopDate = null;
+                     $scope.treatmentForm.StopDateEstimated = false;
+                     $scope.treatmentForm.reasonStopped = 'Select';
+                     $scope.treatmentForm.rsComments = null;
+                     //$scope.$apply();
+                 }
+             }
+             
+             $scope.doseUnknownChanged = function(){
+                 if($scope.antibioticForm.doseUnknown){
+                     $scope.antibioticForm.NewDose = null;
+                     $scope.antibioticForm.NewUnit = null;
+                 }
+             }   
+             $scope.doseStatusChanged = function(){
+                 if($scope.treatmentForm.DoseStatus == 'Dose is correct' || $scope.treatmentForm.DoseStatus == 'Unknown'){
+                     $scope.treatmentForm.NewDose = null;
+                     $scope.treatmentForm.NewUnit = null;    
+                 }
+             }
+             
+             $scope.frequencyStatusChanged = function(){
+                 if($scope.treatmentForm.FrequencyStatus == 'Frequency is correct' 
+                                 || $scope.treatmentForm.FrequencyStatus == 'Unknown'){
+                    $scope.treatmentForm.NewFrequency = null;
+                     $scope.treatmentForm.NewFrequent = null;    
+                 }
+             }
+             
+             $scope.frequencyChanged = function(){
+                 if($scope.treatmentForm.NewFrequency != 'Other'){
+                     $scope.treatmentForm.NewFrequent = null;
+                 }
+             }
+             
+             $scope.freqChanged = function(){
+                 if($scope.antibioticForm.NewFrequency != 'Other'){
+                     $scope.antibioticForm.NewFrequent = null;
+                 }
+             }
+             
+             $scope.startDateChanged = function(){
+                 if($scope.treatmentForm.MedicationDateStatus == 'Date is correct'){
+                     $("#treatmentStartdatem").val(null);
+                 }
+             }
+             
+            $scope.removeRow = function(uForm,indx){   
+                $scope.getScrollPosition();
+                
+                var r = confirm("If this record was created in error, click 'OK' to continue. If antibiotic has been stopped, click 'Cancel' and then select the 'Edit' button to update the Stop Date.");
+                if (r == true) {
+                    if(uForm.Id != null && uForm.Id != ''){
+                        $scope.delAntiList.push(uForm.Id);
+                        $scope.antibioticRecords.splice(indx,1);
+                        window.scrollTo(0,top);
+                        return;
+                     } 
+                     else{         
+                         $scope.antibioticRecords.splice(indx, 1 );  
+                         return; 
+                     }  
+                 }
+                 else{ 
+                     return;
+                 }   
+             }; 
+             
+             $scope.treatmentRemoveRow = function(uForm,indx){ 
+                 $scope.getScrollPosition();
+                 
+                 var r = confirm("If this record was created in error, click 'OK' to continue. If treatment has been stopped, click 'Cancel' and then select the 'Edit' button to update the Stop Date.");
+                 if (r == true) {   
+                     if(uForm.Id != null && uForm.Id != ''){
+                         $scope.delTrtList.push(uForm.Id);
+                         $scope.treatmentRecords.splice(indx,1);
+                         window.scrollTo(0,top);
+                         return;
+                     } 
+                     else{      
+                         $scope.treatmentRecords.splice(indx, 1);   
+                         return;
+                     }  
+                 }
+                 else{
+                     return;
+                 }   
+             };
+             
+             $scope.removeProbioticRow = function(uForm,indx){ 
+                 $scope.getScrollPosition();
+                 
+                 var r = confirm("If this record was created in error, click 'OK' to continue. If probiotic has been stopped, click 'Cancel' and then select the 'Edit' button and select the checkbox for 'I stopped taking this'.");
+                 if (r == true) { 
+                     if(uForm.Id != null && uForm.Id != ''){
+                         $scope.delProList.push(uForm.Id);
+                         $scope.probioticRecords.splice(indx,1);
+                         window.scrollTo(0,top);
+                         return;
+                     } 
+                     else{      
+                         $scope.probioticRecords.splice(indx, 1);   
+                         return;
+                     }  
+                 }
+                 else{
+                     return;
+                 }   
+             };
+             
+             $scope.CancelClick = function(){  
+                  if('{!formMode}' == 'Edit'){
+                      window.location = "{!$page.Plexus_PatientPage}?id={!patientId}&sId={!studySFId}&pssId={!psspId}&mode=View";
+                  }
+                  else{
+                      window.location = "{!$page.Plexus_PatientPage}?id={!patientId}&sId={!studySFId}&pssId={!psspId}&mode=View";
+                  }
+              }
+              
+              $scope.anti6monthsChanged = function(oldVal){
+                  var count = 0;
+                  for(var i=0; i<$scope.antibioticRecords.length; i++){
+                      if($scope.antibioticRecords[i].StopDate != null && $scope.antibioticRecords[i].StopDate != ''){
+                          count++;
+                      }
+                  }
+                  if($scope.questionObj[0].resp == 'No'){
+                      if(oldVal = 'Yes' && $scope.antibioticRecords.length != count){
+                          $scope.questionObj[0].resp = 'Yes';
+                          alert("Please delete or update the 'stop date' on antibiotic information which was provided by you earlier");
+                          
+                          return;
+                      } 
+                  }
+              }
+              
+              $scope.proQuesChanged = function(oldVal){
+                  if($scope.questionObj[1].resp == 'No'){
+                      if(oldVal = 'Yes' && $scope.probioticRecords.length > 0){
+                          $scope.questionObj[1].resp = 'Yes';
+                          alert("Please delete probiotic information which was provided by you earlier");
+                          
+                          return;
+                      }
+                  }
+              }
+              
+            $scope.formatDosage = function(input){
+                input = parseFloat(input);
+                
+                if(input % 1 === 0) {
+                  input = input.toFixed(0);
+                }
+                else {
+                  input = input.toFixed(2);
+                }
+                
+                return input.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+            
+            $scope.formatDosageDecimal = function(input){
+                if(input != null && input != undefined && input != ''){
+                    input = parseFloat(input);
+                    
+                    if(input % 1 === 0) {
+                      input = input.toFixed(0);
+                    }
+                    else {
+                      input = input.toFixed(2);
+                    }
+                }
+                
+                return input;
+            }
+            
+              $scope.formatNum = function(val) {
+                var index = val.indexOf('.');
+                var tempVal;
+                if(index > 0){
+                    tempVal = val.substring(0,index);
+                }
+                else{
+                    tempVal = val;
+                }
+       
+                var Num = "" + parseInt(tempVal);
+                var temp1 = "";
+                var temp2 = "";  
+                var count = 0;
+                
+                for (var k = Num.length-1; k >= 0; k--) {
+                    var oneChar = Num.charAt(k);
+                    if (count == 3) {
+                        temp1 += ",";
+                        temp1 += oneChar;
+                        count = 1;
+                        continue;
+                    }
+                    else {
+                        temp1 += oneChar;
+                        count ++;
+                    }
+                }
+                for (var k = temp1.length-1; k >= 0; k--) {
+                    var oneChar = temp1.charAt(k);
+                    temp2 += oneChar;
+                }  
+                
+                if(index > 0){
+                    tempVal = temp2+val.substring(index);
+                }
+                else{
+                    tempVal = temp2;
+                }          
+                   
+                return tempVal;           
+            }
+            
+            
+            
+        }]);
+        
+        function isNumber(evt) {
+            evt = (evt) ? evt : window.event;
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode > 31 && (charCode < 48 || charCode > 57) ) {
+                return false;
+            }
+            return true;
+        }
+        
+        function isDecimalNumber(evt) {
+            evt = (evt) ? evt : window.event;
+
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+
+            if(charCode == 46){
+                return true;
+            }
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                return false;
+            }
+            
+            return true;
+        }
+        
+        function isValidDate(date){
+            var matches = /^(\d{2})[-\/](\d{2})[-\/](\d{4})$/.exec(date);
+            if (matches == null) return false;
+            var d = matches[2];
+            var m = matches[1] - 1;
+            var y = matches[3];
+            var composedDate = new Date(y, m, d);
+            return composedDate.getDate() == d &&
+                    composedDate.getMonth() == m &&
+                    composedDate.getFullYear() == y;
+        }
+        
+        function getFormattedDate(date) {
+        //alert('Before '+date);
+          var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
+          //alert('After '+newDate);
+          var year = newDate.getFullYear();
+          var month = (1 + newDate.getMonth()).toString();
+          month = month.length > 1 ? month : '0' + month;
+          var day = newDate.getDate().toString();
+          day = day.length > 1 ? day : '0' + day;
+          return month + '/' + day + '/' + year;
+        }
+        
+        function getFormattedLocalDate(date) {
+          var year = date.getFullYear();
+          var month = (1 + date.getMonth()).toString();
+          month = month.length > 1 ? month : '0' + month;
+          var day = date.getDate().toString();
+          day = day.length > 1 ? day : '0' + day;
+          return month + '/' + day + '/' + year;
+        }
+        
+        function format(value, replace) {
+            if (!value) {
+                return value;
+            }
+            var target = value.toString();
+            if (replace === undefined) {
+                return target;
+            }
+            if (!angular.isArray(replace) && !angular.isObject(replace)) {
+                return target.split('$0').join(replace);
+            }
+            var token = angular.isArray(replace) && '$' || ':';
+    
+            angular.forEach(replace, function (value, key) {
+                target = target.split(token + key).join(value);
+            });
+            return target;
+        }
+        
+        function myTrim(x) {
+            return x.replace(/^\s+|\s+$/gm,'');
+        }
+        
+        function keyPress(evt,ref){
+            var strValue = $(ref).val();
+            evt = (evt) ? evt : window.event;
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode > 31 && (charCode < 48 || charCode > 57) 
+                            && (charCode != 46 || strValue.indexOf('.') != -1)) {
+                return false;
+                //strValue = strValue.substring(0,el.value.length - 1);
+            }  
+        }
+        
+        
+        function isValidDecimal(str) {
+            var strValue = $(str).val();
+            
+            var decimalOnly = /^(?=.*[1-9])(?:[1-9]\d*\.?|0?\.)\d*$/;
+            if(strValue != '' && strValue != null){
+                if(decimalOnly.test(strValue)){
+                    var decimalCheck = /(?!^0*$)(?!^0*\.0*$)^\d{1,5}(\.\d{1,2})?$/;
+                    if(!decimalCheck.test(strValue)){
+                        alert("Please provide a valid 'Dose' (maximum of 5 digits and 2 decimal places).");
+                        return false;
+                    }
+                }else{
+                    alert("Please provide a valid 'Dose' (maximum of 5 digits and 2 decimal places).");
+                    return false;
+                }
+            }
+        }
+        
+        function isValidCurrency(strValue){
+            var decimalOnly = /^(?=.*[1-9])(?:[1-9]\d*\.?|0?\.)\d*$/;
+            if(strValue != '' && strValue != null){
+                if(decimalOnly.test(strValue)){
+                    var decimalCheck = /(?!^0*$)(?!^0*\.0*$)^\d{1,5}(\.\d{1,3})?$/;
+                    if(!decimalCheck.test(strValue)){
+                        return false;
+                    }
+                    else{
+                        return true;
+                    }
+                }else{
+                    return false;
+                }
+            }
+        }
+        
+        function isValidInteger(str){
+            var strValue = $(str).val();
+            if(strValue.charAt(0) == '0'){
+                alert("Frequency has been selected as 'Other', please provide the valid value for other information.");
+                return false;
+            }
+        }
+        
+        
+        
+    </script>
+    <div ng-app="MyApp" class="ng-cloak">
+    <div id="agapp" ng-controller="MedicationAccuracyController" data-ng-init="pageInit()">
+        <div style="{!IF(isAdmin == 'Yes','display:none','display:block')}">
+            <c:Plexus_Header > </c:Plexus_Header>
+        </div>
+        <div class="{!IF(isAdmin == 'Yes','','landing-container')}">
+        <apex:form style="padding-left: 25px;padding-right: 25px;padding-bottom: 25px;">
+        <h3 style="font-size: 24px;font-weight: normal;font-family: Arial,Helvetica,sans-serif;">Medication Accuracy</h3><br/><br/>
+        <apex:pageblock mode="detail" id="leadPB" title="Medication Accuracy Edit">
+            <apex:pageblockbuttons location="top">
+                <input type="button" class="btn" value = "Cancel" ng-click="CancelClick()" style="background:#FCFCFC;border: 1px solid #b5b5b5;border-bottom-color:#7f7f7f;height: 22px;"/>
+                <input type="button" class="btn" ng-show="isPatient != 'Yes'" value = "Save" ng-click="SaveClick()" style="background:#FCFCFC;border: 1px solid #b5b5b5;border-bottom-color:#7f7f7f;height: 22px;"/>
+                <input type="button" class="btn" value = "Save & Submit" ng-click="SubmitClick()" style="background:#FCFCFC;border: 1px solid #b5b5b5;border-bottom-color:#7f7f7f;height: 22px;"/>
+            </apex:pageblockbuttons>
+           
+            <apex:pagemessages ></apex:pagemessages>
+            
+            <div class="pageBlockSection">Patient Information</div>
+            <c:Plexus_BasicInfo ></c:Plexus_BasicInfo>
+          
+        <apex:pageblocksection id="LeadInformationPdsfBS1" collapsible="false" columns="1">
+        <div class="form-style-2-heading">Medication Tracking</div> 
+        <div ng-show="treatmentRecords == null || treatmentRecords.length == 0">
+        Have you had any new medication or dose change since your last visit? If yes, please update the form.
+        </div> 
+        <div align="center">
+        <br/>
+        <input type="button" class="btn" ng-show="userForm.formStatus != 'Submitted'" value="New Treatment" style="background:#FCFCFC;border: 1px solid #b5b5b5;border-bottom-color:#7f7f7f;height: 22px;" ng-click="newTreatmentButton()"/>&nbsp;
+        </div>
+        
+        <div ng-show="treatmentRecords.length > 0"><br/>
+        <table width="100%" border="1" cellpadding="0" cellspacing="0">
+            <thead>
+                <tr height="30px">
+                    <th width="12%" align="center" style="vertical-align: middle; text-align: center;">Action</th>
+                    <th width="30%" align="center" style="vertical-align: middle; text-align: center;">Medication</th>
+                    <th width="10%" align="center" style="vertical-align: middle; text-align: center;">Dose</th>
+                    <th width="18%" align="center" style="vertical-align: middle; text-align: center;">Frequency</th>
+                    <th width="15%" align="center" style="white-space: normal;vertical-align: middle; text-align: center;">Start Date</th>
+                    <th width="15%" align="center" style="white-space: normal;vertical-align: middle; text-align: center;">Stop Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr height="30px" ng-repeat="uForm in treatmentRecords track by $index">
+                    <td align="center" width="12%" style="vertical-align:middle">
+                    <input type="button" value="Edit" ng-click="treatmentEditClicked(uForm,$index)"/>&nbsp;
+                    <input type="button" value="Delete" ng-click="treatmentRemoveRow(uForm,$index)"/>
+                    </td>
+                    <td align="center" width="30%" style="vertical-align:middle">
+                    {{uForm.Medication}}  
+                    {{uForm.Medication == 'Other' || uForm.Medication == 'Probiotic - Other' ? ' - '+uForm.MedicationOther : null}}
+                    </td>
+                    <td align="center" width="10%" style="vertical-align:middle">
+                    {{uForm.DoseStatus == 'Unknown' ? uForm.DoseStatus : formatDosage(uForm.NewDose)+' '+uForm.NewUnit}}
+                    </td>
+                    <td align="center" width="18%" style="vertical-align:middle">
+                    {{uForm.FrequencyStatus == 'Unknown' ? uForm.FrequencyStatus : (uForm.NewFrequency != 'Other' ? uForm.NewFrequency : 'Once every '+uForm.NewFrequent+' days')}}
+                    </td>
+                    <td align="center" width="15%" style="vertical-align:middle">{{uForm.NewStartDate}}</td>
+                    <td align="center" width="15%" style="vertical-align:middle">
+                    {{(uForm.StopDate == null || uForm.StopDate =='') ? 'I am still taking' : uForm.StopDate}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+        </apex:pageblocksection>
+        
+        <apex:pageblocksection columns="1">
+        <div class="form-style-2-heading">Antibiotics Information</div>
+        <div style="margin-left:10px;margin-top:10px">
+        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+            <tr width="100%" height="30px">
+                <td align="left" width="40%">
+                <label class="labelCol" style="text-align:left;display:inherit;margin-top: 3px;">{{questionObj[0].question}}<abbr class="req" >*</abbr></label>
+                </td>
+                <td width="20%" align="left" style="vertical-align: middle;">
+                <div class="radio">
+                    <label><input type="radio" ng-model="questionObj[0].resp" ng-disabled = "userForm.formStatus == 'Submitted'" name="antiBioticsLast6Months" value="Yes" ng-click="anti6monthsChanged('{{questionObj[0].resp}}')"/>Yes</label>
+                    <label><input type="radio" ng-model="questionObj[0].resp" ng-disabled = "userForm.formStatus == 'Submitted'" name="antiBioticsLast6Months" value="No" ng-click="anti6monthsChanged('{{questionObj[0].resp}}')"/>No</label>
+                </div>
+                </td>
+                <td width="40%"/>
+            </tr>
+        </table>
+           
+        </div>
+         
+        <div>
+        
+        <div align="center">
+        <input type="button" ng-show="userForm.formStatus != 'Submitted' && questionObj[0].resp == 'Yes'" class="btn" value="New Antibiotic Treatment" style="background:#FCFCFC;border: 1px solid #b5b5b5;border-bottom-color:#7f7f7f;height: 22px;" ng-click="newAntibioticTreatmentButton()"/>
+        </div>
+        
+        <div ng-show="antibioticRecords.length > 0"><br/>
+        <table width="100%" border="1" cellpadding="0" cellspacing="0">
+            <thead>
+                <tr height="30px">
+                    <th width="10%" align="center" style="vertical-align: middle; text-align: center;">Action</th>
+                    <th width="26%" align="center" style="vertical-align: middle; text-align: center;">Medication</th>
+                    <th width="10%" align="center" style="vertical-align: middle; text-align: center;">Dose</th>
+                    <th width="15%" align="center" style="white-space: normal;vertical-align: middle; text-align: center;">Route of Administration</th>
+                    <th width="15%" align="center" style="vertical-align: middle; text-align: center;">Frequency</th>
+                    <th width="12%" align="center" style="white-space: normal;vertical-align: middle; text-align: center;">Start Date</th>
+                    <th width="12%" align="center" style="white-space: normal;vertical-align: middle; text-align: center;">Stop Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr height="30px" ng-repeat="uForm in antibioticRecords track by $index">
+                    <td align="center" width="10%" style="vertical-align:middle"> 
+                    <input type="button" value="Edit" ng-click="antibioticEditClicked(uForm,$index)"/>&nbsp;
+                    <input type="button" value="Delete" ng-click="removeRow(uForm,$index)"/>
+                    </td>
+                    <td align="center" width="26%" style="vertical-align:middle">
+                    {{uForm.Medication}}  
+                    {{uForm.Medication == 'Other (Antibiotic)' ? ' - '+uForm.MedicationOther : null}}
+                    </td>
+                    <td align="center" width="10%" style="vertical-align:middle">
+                        {{uForm.doseUnknown == true ?'I Don\'t Know': formatDosage(uForm.NewDose)+" "+uForm.NewUnit}}
+                    </td>
+                    <td align="center" width="15%" style="vertical-align:middle">{{uForm.routeOfAdmin}}</td>
+                    <td align="center" width="15%" style="vertical-align:middle">
+                    {{uForm.NewFrequency != 'Other' ? uForm.NewFrequency : 'Once every '+uForm.NewFrequent+' days'}}
+                    </td>
+                    <td align="center" width="12%" style="vertical-align:middle">{{uForm.NewStartDate}}</td>
+                    <td align="center" width="12%" style="vertical-align:middle">
+                    {{(uForm.StopDate == null || uForm.StopDate =='') ? 'I am still taking' : uForm.StopDate}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+        </div>
+        </apex:pageblocksection>
+
+        <apex:pageblocksection columns="1">
+            <div class="form-style-2-heading">Probiotics Information</div>
+            <div style="margin-left:10px;margin-top:10px">
+            <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                <tr width="100%" height="30px">
+                    <td align="left" width="40%">
+                    <label class="labelCol" style="text-align:left;display:inherit;margin-top: 3px;">{{questionObj[1].question}}<abbr class="req" >*</abbr></label>
+                    </td>
+                    <td width="20%" align="left" style="vertical-align: middle;">
+                    <div class="radio">
+                        <label><input type="radio" ng-model="questionObj[1].resp" ng-disabled = "userForm.formStatus == 'Submitted'" name="probioticsLast3Months" value="Yes" ng-click="proQuesChanged('{{questionObj[1].resp}}')"/>Yes</label>
+                        <label><input type="radio" ng-model="questionObj[1].resp" ng-disabled = "userForm.formStatus == 'Submitted'" name="probioticsLast3Months" value="No" ng-click="proQuesChanged('{{questionObj[1].resp}}')"/>No</label>
+                    </div>
+                    </td>
+                    <td width="40%"/>
+                </tr>
+                
+            </table>
+            </div>
+            
+            <div align="center">
+            <input type="button" ng-show="userForm.formStatus != 'Submitted' && questionObj[1].resp == 'Yes'" class="btn" value="Add Probiotic Treatment" ng-click="NewProbioticTreatmentButton()" style="background:#FCFCFC;border: 1px solid #b5b5b5;border-bottom-color:#7f7f7f;height: 22px;" />
+            </div>
+            <div ng-show="probioticRecords.length > 0"><br/>
+            <table width="100%" border="1" cellpadding="0" cellspacing="0">
+                <thead>
+                    <tr height="30px">
+                        <th width="15%" align="center" style="vertical-align: middle; text-align: center;">Action</th>
+                        <th width="35%" align="center" style="vertical-align: middle; text-align: center;">Medication</th>
+                        <th width="40%" align="center" style="vertical-align: middle; text-align: center;">Other</th>
+                        <th width="10%" align="center" style="vertical-align: middle; text-align: center;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr height="30px" ng-repeat="uForm in probioticRecords track by $index">
+                        <td align="center" width="15%" style="vertical-align:middle"> 
+                            <input type="button" value="Edit" ng-click="proEditClicked(uForm,$index)"/>&nbsp;
+                            <input type="button" value="Delete" ng-click="removeProbioticRow(uForm,$index)"/>
+                        </td>
+                    <td align="center" width="35%" style="vertical-align:middle">
+                        {{uForm.Medication}}  
+                    </td>
+                    <td align="center" width="40%" style="vertical-align:middle">
+                        {{uForm.Medication == 'Probiotic - Other' ? uForm.MedicationOther : '-'}}
+                    </td>
+                    <td align="center" width="10%" style="vertical-align:middle">
+                    {{uForm.ongoing ? 'I am still taking' : 'Stopped'}}
+                    </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            </div>    
+            </apex:pageBlockSection>
+        </apex:pageblock>
+        </apex:form>
+    </div>
+         <div style="{!IF(isAdmin == 'Yes','display:none','display:block')}">
+            <c:Plexus_Footer > </c:Plexus_Footer>
+        </div>
+    <div>
+        <modal-dialog show='modalShown' type='Loading'>
+            <div class="bar">
+            <p>loading</p>
+            </div>
+        </modal-dialog> 
+    </div>
+    
+    <div>
+        <modal-dialog show='modalShownWindow' id="modalShownWindow" width="70%" style="height:100%;max-height:600px;" type='newWindow'>
+            <apex:form >
+            <h3>New Treatment</h3><br/>
+            <apex:pageblock >
+            <apex:pageblockbuttons location="bottom">
+            <input type="button" value="Cancel" ng-click="treatmentCancelClicked()"/>
+            <input type="button"  ng-show = "formType != 'View'" value="Save" ng-click="treatmentSaveClicked()"/>
+            </apex:pageblockbuttons>
+            <apex:pageblocksection id="Legfd" collapsible="false" columns="1">
+             <apex:outputPanel layout="block" style="max-height:550px;overflow:auto;width:100%;" >
+            <table width="100%" border="0" cellpadding="0" cellspacing="0">
+
+            <tr width="100%" height="30px">
+                <td align="right" width="20%" style="vertical-align: middle;">
+                <label class="labelCol" style="display:inherit;">Medication<abbr class="req" >*</abbr></label>
+                </td>
+                <td width="80%" style="vertical-align: middle;">
+                <div style="font:14px arial">
+                    <input type="text" class="dataCpl" id="trtMedications" ng-model="treatmentForm.Medication" ng-change="trtMedicationChange()" style="width:300px;display: inherit;margin-top: 3px;"/>
+                    <div id="container1">
+                    </div>
+                </div>
+                </td>
+            </tr>
+            
+            <tr width="100%" height="30px" ng-show = "treatmentForm.Medication == 'Other' || treatmentForm.Medication == 'Probiotic - Other'">
+                <td align="right" width="20%" style="vertical-align: middle;">
+                <label class="labelCol" style="display:inherit;">Other<abbr class="req" >*</abbr></label>
+                </td>
+                <td width="80%" style="vertical-align: middle;">
+                <div style="font:14px arial">
+                    <input type="text" class="dataCpl" maxlength="20" ng-model="treatmentForm.MedicationOther" style="width:300px;display: inherit;margin-top: 3px;"/>
+                </div>
+                </td>
+            </tr>
+            
+            <tr width="100%" height="30px" ng-show ="formType == 'New'">
+                <td align="right" width="20%" style="vertical-align: middle;">
+                <label class="labelCol" style="display:inherit;">Dose<abbr class="req" >*</abbr></label>
+                </td>
+                <td width="80%" style="vertical-align: middle;">
+                <fieldset style="width: 60%;">
+                    <input ng-model="treatmentForm.NewDose" id="newDose" maxlength="8" onkeypress="return isDecimalNumber(event)" onblur="isValidDecimal(this)"  type="text" style="width: 70px;"/>
+                    <label><input type="radio" ng-model="treatmentForm.NewUnit" name="measure1" value="mg" id="measureMg"/>mg</label>&nbsp;&nbsp;
+                    <label><input type="radio" ng-model="treatmentForm.NewUnit" name="measure1" value="mg/kg" id="measureMgKg"/>mg/kg</label>  
+                </fieldset>
+                </td>
+            </tr>  
+           
+            <tr width="100%" height="30px" ng-show = "formType == 'Edit'">
+                <td align="right" width="20%" style="vertical-align: middle;">
+                <label class="labelCol" style="display:inherit;">Dose<abbr class="req" >*</abbr></label>
+                </td>
+                <td width="80%" style="vertical-align: middle;">
+                <label for="pdob" id="pdob" style="display: inherit;padding-top: 5px;font-weight: normal !important;">
+                    {{treatmentForm.ViewDoseStatus == 'Unknown' ? treatmentForm.ViewDoseStatus : (formatDosage(treatmentForm.ViewDose) + ' ' + treatmentForm.ViewUnit)}}&nbsp;&nbsp;
+                    <label><input type="radio" ng-model="treatmentForm.DoseStatus" name="doseStatus" value="Dose is correct" id="doseCorrect" ng-change="doseStatusChanged()"/>Dose is correct</label>&nbsp;&nbsp;
+                    <label><input type="radio" ng-model="treatmentForm.DoseStatus" name="doseStatus" value="Dose is wrong" id="doseIncorrect" ng-change="doseStatusChanged()"/>Dose is wrong</label>&nbsp;&nbsp;
+                    <label><input type="radio" ng-model="treatmentForm.DoseStatus" name="doseStatus" value="Unknown" id="doseUnknown" ng-change="doseStatusChanged()"/>Unknown</label>
+                </label>
+                </td>
+            </tr>
+            
+            <tr width="100%" height="30px" ng-show="treatmentForm.DoseStatus == 'Dose is wrong' && formType != 'New'">
+                <td align="right" width="20%" style="vertical-align: middle;">
+                <label class="labelCol" style="display:inherit;">New Dose<abbr class="req" >*</abbr></label>
+                </td>
+                <td width="80%" style="vertical-align: middle;">
+                 <fieldset style="width: 60%;">
+                    <input ng-model="treatmentForm.NewDose" id="editDose" maxlength="8" onkeypress="return isDecimalNumber(event)" onblur="isValidDecimal(this)"  type="text" style="width: 70px;"/>
+                    <label><input type="radio" ng-model="treatmentForm.NewUnit" name="measure" value="mg" id="measureMg"/>mg</label>&nbsp;&nbsp;
+                    <label><input type="radio" ng-model="treatmentForm.NewUnit" name="measure" value="mg/kg" id="measureMgKg"/>mg/kg</label>  
+                </fieldset>
+                </td>
+            </tr>
+            
+            <tr width="100%" height="30px" ng-show = "formType == 'New'">
+                <td align="right" width="20%" style="vertical-align: middle;">
+                <label class="labelCol" style="display:inherit;">Frequency<abbr class="req" >*</abbr></label>
+                </td>
+                <td width="80%" style="vertical-align: middle;">
+                <fieldset style="width: 80%;padding:3px;" ng-style= "{border: treatmentForm.NewFrequency == 'Other' ? '1px solid':'0px'}">
+                    <label><input type="radio" ng-model="treatmentForm.NewFrequency" name="NewFrequency1" value="Daily" id="frequencydaily" ng-change="frequencyChanged()"/>Daily</label>&nbsp;&nbsp;
+                    <label><input type="radio" ng-model="treatmentForm.NewFrequency" name="NewFrequency1" value="2x/day" id="frequency2xday" ng-change="frequencyChanged()"/>2x/day</label>&nbsp;&nbsp;  
+                    <label><input type="radio" ng-model="treatmentForm.NewFrequency" name="NewFrequency1" value="3x/day" id="frequency3xday" ng-change="frequencyChanged()"/>3x/day</label>&nbsp;&nbsp;
+                    <label><input type="radio" ng-model="treatmentForm.NewFrequency" name="NewFrequency1" value="4x/day" id="frequency4xday" ng-change="frequencyChanged()"/>4x/day</label>&nbsp;&nbsp;
+                    <label><input type="radio" ng-model="treatmentForm.NewFrequency" name="NewFrequency1" value="Other" id="frequencyOther" ng-change="frequencyChanged()"/>Other</label>
+                    <div ng-show="treatmentForm.NewFrequency == 'Other'" style="padding-top:5px;">
+                    Once every <input type="text" onkeypress="return isNumber(event)" onblur="isValidInteger(this)" maxlength="2" ng-model="treatmentForm.NewFrequent"/> days
+                    </div>
+                </fieldset>
+                </td>
+            </tr>
+            
+            <tr width="100%" height="30px" ng-show ="formType =='Edit'">
+                <td align="right" width="20%" style="vertical-align: middle;">
+                <label class="labelCol" style="display:inherit;">Frequency<abbr class="req" >*</abbr></label>
+                </td>
+                <td width="80%" style="vertical-align: middle;">
+                <label for="pdob" id="pdob" style="display: inherit;padding-top: 5px;font-weight: normal !important;">
+                    {{treatmentForm.ViewFrequencyStatus == 'Unknown' ? treatmentForm.ViewFrequencyStatus : (treatmentForm.ViewFrequency != 'Other' ? treatmentForm.ViewFrequency : 'Once every '+treatmentForm.ViewFrequent+' days')}}&nbsp;&nbsp;
+                    <label><input type="radio" ng-model="treatmentForm.FrequencyStatus" name="FrequencyStatus" value="Frequency is correct" id="frequencyCorrect" ng-change="frequencyStatusChanged()"/>Frequency is correct</label>&nbsp;&nbsp;
+                    <label><input type="radio" ng-model="treatmentForm.FrequencyStatus" name="FrequencyStatus" value="Frequency is wrong" id="frequencIncorrect" ng-change="frequencyStatusChanged()"/>Frequency is wrong</label>&nbsp;&nbsp;
+                    <label><input type="radio" ng-model="treatmentForm.FrequencyStatus" name="FrequencyStatus" value="Unknown" id="frqUnknown" ng-change="frequencyStatusChanged()"/>Unknown</label>
+                </label>
+                </td>
+            </tr>
+             
+            <tr width="100%" height="30px" ng-show="treatmentForm.FrequencyStatus == 'Frequency is wrong' && formType != 'New'">
+                <td align="right" width="20%" style="vertical-align: middle;">
+                <label class="labelCol" style="display:inherit;">New Frequency<abbr class="req" >*</abbr></label>
+                </td>
+                <td width="80%" style="vertical-align: middle;padding-top: 5px;">
+                 <fieldset style="width: 80%;padding:3px;" ng-style= "{border: treatmentForm.NewFrequency == 'Other' ? '1px solid':'0px'}">
+                    <label><input type="radio" ng-model="treatmentForm.NewFrequency" name="NewFrequency" value="Daily" id="frequencydaily" ng-change="frequencyChanged()"/>Daily</label>&nbsp;&nbsp;
+                    <label><input type="radio" ng-model="treatmentForm.NewFrequency" name="NewFrequency" value="2x/day" id="frequency2xday" ng-change="frequencyChanged()"/>2x/day</label>&nbsp; &nbsp; 
+                    <label><input type="radio" ng-model="treatmentForm.NewFrequency" name="NewFrequency" value="3x/day" id="frequency3xday" ng-change="frequencyChanged()"/>3x/day</label>&nbsp;&nbsp;
+                    <label><input type="radio" ng-model="treatmentForm.NewFrequency" name="NewFrequency" value="4x/day" id="frequency4xday" ng-change="frequencyChanged()"/>4x/day</label>&nbsp;&nbsp;
+                    <label><input type="radio" ng-model="treatmentForm.NewFrequency" name="NewFrequency" value="Other" id="frequencyOther" ng-change="frequencyChanged()"/>Other</label>
+                    <div ng-show="treatmentForm.NewFrequency == 'Other'" style="padding-top:5px;">
+                    Once every <input type="text" onkeypress="return isNumber(event)" onblur="isValidInteger(this)" maxlength="2" ng-model="treatmentForm.NewFrequent"/> days
+                    </div>
+                </fieldset>
+                </td>
+            </tr>
+            
+            <tr width="100%" height="30px" ng-show="formType == 'New'">
+                <td align="right" width="20%" style="vertical-align: middle;">
+                <label class="labelCol" style="display:inherit;">Start Date<abbr class="req" >*</abbr></label>
+                </td>
+                <td width="80%" style="vertical-align: middle;">
+                <fieldset style="width: 80%;padding-top:10px">
+                    <label>
+                    <input type="text" id="treatmentStartdate" ng-model="treatmentForm.NewStartDate" readonly="true"/>
+                    <input type="checkbox" ng-model="treatmentForm.StartDateEstimated" ng-disabled="treatmentForm.NewStartDate == null || treatmentForm.NewStartDate == ''">
+                    <label>Estimated</label></input>
+                    </label>
+                </fieldset>
+                </td>
+            </tr>
+            
+            <tr width="100%" height="30px" ng-show="formType == 'Edit'">
+                <td align="right" width="20%" style="vertical-align: middle;">
+                <label class="labelCol" style="display:inherit;">Start Date<abbr class="req" >*</abbr></label>
+                </td>
+                <td width="80%" style="vertical-align: middle;">
+                <label for="pdob" id="pdob" style="display: inherit;padding-top: 5px;font-weight: normal !important;">
+                    <label>
+                    {{treatmentForm.ViewStartDate}}
+                    <input type="checkbox" ng-model="treatmentForm.ViewStartDateEstimated" ng-disabled="true">
+                    <label>Estimated</label>
+                    </input>
+                    </label>&nbsp;&nbsp;
+                    <label><input type="radio" ng-model="treatmentForm.MedicationDateStatus" name="medicationDateStatus" value="Date is correct" id="dateCorrect" ng-change="startDateChanged()"/>Date is correct</label>&nbsp;&nbsp;
+                    <label><input type="radio" ng-model="treatmentForm.MedicationDateStatus" name="medicationDateStatus" value="Date is wrong" id="dateIncorrect" ng-change="startDateChanged()"/>Date is wrong</label>
+                </label>
+                </td>
+            </tr>
+             
+            <tr width="100%" height="30px" ng-show="treatmentForm.MedicationDateStatus == 'Date is wrong' && formType == 'Edit'">
+                <td align="right" width="20%" style="vertical-align: middle;">
+                <label class="labelCol" style="display:inherit;">New Start Date<abbr class="req" >*</abbr></label>
+                </td>
+                <td width="80%" style="vertical-align: middle;">
+                 <fieldset style="width: 80%;padding-top: 5px;">
+                    <label>
+                    <input type="text" id="treatmentStartdatem" ng-model="treatmentForm.NewStartDate" readonly="true" />
+                    <input type="checkbox" ng-model="treatmentForm.StartDateEstimated" ng-disabled="treatmentForm.NewStartDate == null || treatmentForm.NewStartDate == ''">
+                    <label>Estimated</label></input>
+                    </label>
+                </fieldset>
+                </td>
+            </tr> 
+            
+            <tr width="100%" height="30px">
+                <td align="right" width="20%" style="vertical-align: middle;">
+                <label class="labelCol" style="display:inherit;">Stop Date<abbr class="req" >*</abbr></label>
+                </td>
+                <td width="80%" style="vertical-align: middle;">
+                    <fieldset style="width: 100%;padding-top:5px">
+                    <label>
+                    <input type="text" id = "trtmntStopDate" ng-model="treatmentForm.StopDate" ng-disabled="treatmentForm.ongoing" readonly="true" style="display: inherit;margin-top: 3px;"/>
+                    <input type="checkbox" ng-model="treatmentForm.StopDateEstimated" ng-disabled="treatmentForm.ongoing || treatmentForm.StopDate == null || treatmentForm.StopDate == ''">
+                    <label>Estimated</label></input>
+                    </label>&nbsp;&nbsp;
+                    <input type="checkbox" ng-model="treatmentForm.ongoing" ng-click="isTrtmntOngoingStopDate()">I am still taking this</input>
+                    </fieldset>
+                 </td>
+            </tr>  
+            <tr width="100%" height="30px" ng-show ="treatmentForm.StopDate != null && treatmentForm.StopDate != ''">
+                <td align="right" width="20%" style="vertical-align: middle;">
+                <label class="labelCol" style="display:inherit;">Reason Stopped<abbr class="req" >*</abbr></label>
+                </td>
+                <td width="80%" style="vertical-align: middle;"  >
+                    <select ng-model="treatmentForm.reasonStopped" ng-options="val for val in reasonStoppedValues" style="display: inherit;margin-top: 3px;"> 
+                    </select> 
+                </td>
+            </tr>    
+            <tr width="100%" height="30px" ng-show="treatmentForm.reasonStopped == 'Other'">
+                <td align="right" width="20%" style="vertical-align: middle;">
+                <label class="labelCol" style="display:inherit;">Reason Stopped Comments<abbr class="req" >*</abbr></label>
+                </td>
+                <td width="80%" style="vertical-align: middle;" ng-show ="formType != 'antiView'" >
+                    <textarea rows="3" cols="50" maxlength="500" ng-model="treatmentForm.rsComments" style="display: inherit;;margin-top: 3px;"/>
+                        </td>
+            </tr>    
+            </table>
+            </apex:outputPanel>
+            </apex:pageblocksection>
+            </apex:pageblock>
+            </apex:form>
+        </modal-dialog>
+    </div>
+    <div>
+        <modal-dialog show='modalShownAntiWindow' width="70%" style="height:100%;max-height:600px;" type='antibioticWindow'>
+            <apex:form >
+            <h3>New Antibiotic Treatment</h3><br/>
+            <apex:pageblock >
+                <apex:pageblockbuttons location="bottom">
+                    <input type="button" value="Cancel" ng-click="antibioticCancelClicked()"/>
+                    <input type="button" value="Save" ng-click="antibioticSaveClicked()"/>
+                </apex:pageblockbuttons>
+                <apex:pageblocksection id="Legfd" collapsible="false" columns="1">
+                <apex:outputPanel layout="block" style="max-height:500px;overflow:auto;width:100%;" >
+                <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                    <tr width="100%" height="30px">
+                        <td align="right" width="20%" style="vertical-align: middle;">
+                        <label class="labelCol" style="display:inherit;">Medication<abbr class="req" >*</abbr></label>
+                        </td>
+                        <td width="80%" style="vertical-align: middle;">
+                        <input type="text" ng-model="antibioticForm.Medication" ng-change="antiMedicationChange()" id="trtAntibiotics" class="dataCpl" style="width:300px;display: inherit;margin-top: 3px;"/>
+                        <div id="container2">
+                        </div>
+                        </td>
+                    </tr>
+                    <tr width="100%" height="30px" ng-show = "antibioticForm.Medication == 'Other (Antibiotic)'">
+                        <td align="right" width="20%" style="vertical-align: middle;">
+                        <label class="labelCol" style="display:inherit;">Other<abbr class="req" >*</abbr></label>
+                        </td>
+                        <td width="80%" style="vertical-align: middle;">
+                        <input type="text" ng-model="antibioticForm.MedicationOther" maxlength="20" class="dataCpl" style="width:300px; display: inherit;margin-top: 3px;"/>
+                        </td>
+                    </tr>
+
+                    <tr width="100%" height="30px">
+                        <td align="right" width="20%" style="vertical-align: middle;">
+                        <label class="labelCol" style="display:inherit;">Dose<abbr class="req" >*</abbr></label>
+                        </td>
+                        <td width="80%" style="vertical-align: middle;">
+                        <fieldset style="width: 60%;border:1px solid;padding:3px">
+                            <input ng-model="antibioticForm.NewDose" id="newDoseAnti" maxlength="8" onkeypress="return isDecimalNumber(event)" onblur="isValidDecimal(this)" ng-disabled="antibioticForm.doseUnknown" type="text" style="width: 70px;"/>
+                            <label><input type="radio" ng-model="antibioticForm.NewUnit" ng-disabled="antibioticForm.doseUnknown" name="measure" value="mg" id="measureMg"/>mg</label>&nbsp;&nbsp;
+                            <label><input type="radio" ng-model="antibioticForm.NewUnit" ng-disabled="antibioticForm.doseUnknown" name="measure" value="mg/kg" id="measureMgKg"/>mg/kg</label>  
+                            <div>
+                             <label><input type="checkbox" ng-model="antibioticForm.doseUnknown" name="Unknown" id="measureMgKg" ng-click="doseUnknownChanged()"/>I Don't Know</label>
+                            </div>
+                        </fieldset>
+  
+                        </td>
+                    </tr> 
+
+                    <tr width="100%" height="30px">
+                        <td align="right" width="20%" style="vertical-align: middle;padding-right:8px">
+                        <label class="labelCol" style="display: table-row;">Route of Administration<abbr class="req" >*</abbr></label>
+                        </td>
+                        <td width="80%" style="vertical-align: middle;" ng-show ="formType != 'antiView'" >
+                            <select ng-model="antibioticForm.routeOfAdmin" ng-options="val for val in routeAdminValues" style="display: inherit;margin-top: 3px;"> 
+                            </select> 
+                        </td>
+
+                    </tr>  
+                    <tr width="100%" height="30px">
+                        <td align="right" width="20%" style="vertical-align: middle;">
+                                <label class="labelCol" style="display:inherit;">Frequency<abbr class="req" >*</abbr></label>
+                        </td>
+                        <td width="80%" style="vertical-align: middle;padding-top:5px;">
+                        <fieldset style="width: 80%;padding:3px" ng-style= "{border: antibioticForm.NewFrequency == 'Other' ? '1px solid':'0px'}">
+                            <label><input type="radio" ng-model="antibioticForm.NewFrequency" name="NewFrequency1" value="Daily" id="frequencydaily" ng-change="freqChanged()"/>Daily</label>&nbsp;&nbsp;
+                            <label><input type="radio" ng-model="antibioticForm.NewFrequency" name="NewFrequency1" value="2x/day" id="frequency2xday" ng-change="freqChanged()"/>2x/day</label> &nbsp;&nbsp; 
+                            <label><input type="radio" ng-model="antibioticForm.NewFrequency" name="NewFrequency1" value="3x/day" id="frequency3xday" ng-change="freqChanged()"/>3x/day</label>&nbsp;&nbsp;
+                            <label><input type="radio" ng-model="antibioticForm.NewFrequency" name="NewFrequency1" value="4x/day" id="frequency4xday" ng-change="freqChanged()"/>4x/day</label>&nbsp;&nbsp;
+                            <label><input type="radio" ng-model="antibioticForm.NewFrequency" name="NewFrequency1" value="I Don't Know" id="frequencydontknow" ng-change="freqChanged()"/>I Don't Know</label>&nbsp;&nbsp;
+                            <label><input type="radio" ng-model="antibioticForm.NewFrequency" name="NewFrequency1" value="Other" id="frequencyOther" ng-change="freqChanged()"/>Other</label>
+                            <div ng-show="antibioticForm.NewFrequency == 'Other'" style="padding-top:5px;">
+                            Once every <input type="text" onkeypress="return isNumber(event)" onblur="isValidInteger(this)" maxlength="2" ng-model="antibioticForm.NewFrequent"/> days
+                            </div>
+                        </fieldset>
+                        </td>
+                    </tr> 
+
+                    <tr width="100%" height="30px">
+                        <td align="right" width="20%" style="vertical-align: middle;padding-top:5px;">
+                        <label class="labelCol" style="display:inherit;">Start Date<abbr class="req" >*</abbr></label>
+                        </td>
+                        <td width="80%" style="vertical-align: middle;padding-left: 1px;" class="dataCol" >
+                            <label style="padding-top: 5px;">
+                            <input type="text" id="startDate" ng-model="antibioticForm.NewStartDate" readonly="true" style="display: inherit;margin-top: 3px;"/>
+                            <input type="checkbox" ng-model="antibioticForm.StartDateEstimated" ng-disabled="antibioticForm.NewStartDate == null || antibioticForm.NewStartDate == ''">
+                            <label>Estimated</label></input>
+                            </label>
+                        </td>
+                    </tr> 
+
+                    <tr width="100%" height="30px">
+                        <td align="right" width="20%" style="vertical-align: middle;padding-top:5px;">
+                        <label class="labelCol" style="display:inherit;">Stop Date<abbr class="req" >*</abbr></label>
+                        </td>
+                        <td width="80%" style="vertical-align: middle;">
+                            <fieldset style="width: 80%;padding-left: 1px;">
+                            <label style="padding-top: 5px;">
+                            <input type="text" id = "stopDate" ng-model="antibioticForm.StopDate" ng-disabled="antibioticForm.ongoing" readonly="true" style="display: inherit;margin-top: 3px;"/>
+                            <input type="checkbox" ng-model="antibioticForm.StopDateEstimated" ng-disabled="antibioticForm.ongoing || antibioticForm.StopDate == null || antibioticForm.StopDate == ''">
+                            <label>Estimated</label></input>
+                            </label>&nbsp;&nbsp;
+                            <input type="checkbox" ng-model="antibioticForm.ongoing" ng-click="isOngoingStopDate()">I am still taking this</input>
+                            </fieldset>
+                         </td>
+                    </tr> 
+
+                    <tr width="100%" height="30px" ng-show ="antibioticForm.StopDate != null && antibioticForm.StopDate != ''">
+                        <td align="right" width="20%" style="vertical-align: middle;">
+                        <label class="labelCol" style="display:inherit;">Reason Stopped<abbr class="req" >*</abbr></label>
+                        </td>
+                        <td width="80%" style="vertical-align: middle;"  >
+                            <select ng-model="antibioticForm.reasonStopped" ng-options="val for val in reasonStoppedValues" style="display: inherit;margin-top: 3px;"> 
+                            </select> 
+                        </td>
+                    </tr>    
+                    <tr width="100%" height="30px" ng-show="antibioticForm.reasonStopped == 'Other'">
+                        <td align="right" width="20%" style="vertical-align: middle;">
+                        <label class="labelCol" style="display:inherit;">Reason Stopped Comments<abbr class="req" >*</abbr></label>
+                        </td>
+                        <td width="80%" style="vertical-align: middle;" ng-show ="formType != 'antiView'" >
+                            <textarea rows="3" cols="50" maxlength="500" ng-model="antibioticForm.rsComments" style="display: inherit;margin-top: 3px;"/>
+                        </td>
+                    </tr>   
+                </table>
+                </apex:outputPanel>
+                </apex:pageblocksection>
+            </apex:pageblock>
+            </apex:form>
+        </modal-dialog>
+     </div>
+     
+     <div>
+        <modal-dialog show='probioticWindow' width="50%" style="height:100%;max-height:200px;" type='probioticWindow'>
+            <apex:form >
+            <h3>Probiotic Treatment</h3><br/>
+            <apex:pageblock >
+                <apex:pageblockbuttons location="bottom">
+                    <input type="button" value="Cancel" ng-click="proCancelClicked()"/>
+                    <input type="button" value="Save" ng-click="proSaveClicked()"/>
+                </apex:pageblockbuttons>
+                <apex:pageblocksection id="profd" collapsible="false" columns="1">
+                <div>
+                <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                    <tr width="100%" height="30px">
+                        <td align="right" width="20%">
+                            <label class="labelCol" style="display:inherit;margin-top: 3px;">Medication<abbr class="req">*</abbr></label>
+                        </td>
+                        <td width="20%">
+                            <select ng-model="probiotic.Medication" ng-options="val for val in probiotics" ng-change="probiotic.MedicationOther = null;" style="display: inherit;margin-top: 8px;"> 
+                            </select> 
+                        </td>
+                    
+                        <td align="right" width="20%">
+                            <label class="labelCol" style="display:inherit;margin-top: 3px;">Other<abbr class="req" >*</abbr></label>
+                        </td>
+                        <td width="30%">
+                            <input type="text" class="dataCpl" maxlength="20" ng-model="probiotic.MedicationOther" ng-disabled = "probiotic.Medication != 'Probiotic - Other'" style="display: inherit;margin-top: 8px;"/> 
+                        </td>
+                    </tr>
+                    </table>
+                    <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td width="40%" align="right" style="vertical-align: middle;padding-left: 1px;">
+                                <label class="labelCol" style="display:inherit;margin-top: 3px;">
+                                    Are you still taking it?<abbr class="req">*</abbr>&nbsp;
+                                    <input type="radio" ng-model="probiotic.ongoing" value="true" />Yes
+                                    <input type="radio" ng-model="probiotic.ongoing" value="false" />No
+                                </label>
+                            </td>
+                            <td width="22%"/>
+                            <td width="20%"/>
+                            <td width="20%"/>
+                        </tr>
+                    </table>
+                </div>
+                </apex:pageblockSection>
+            </apex:pageblock>
+            </apex:form>
+        </modal-dialog>
+     </div>
+    
+    </div>
+    </div>
+</apex:page> -->
+</apex:page>
