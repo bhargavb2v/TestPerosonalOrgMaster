@@ -34,7 +34,7 @@ global class AccountService {
  global static String updateAccount(String Id, String NewName) {
    Account a = [ Select ID, Name from Account where Id= :Id];
    a.Name = NewName;
-   update a;
+   update a; //Test
 
    return 'Account Updated';
  }
